@@ -45,3 +45,82 @@ DOKI 프로젝트는 단순 기능 구현이 아닌 도메인에 대한 깊은 �
 - SSR 방식의 운영자용 백오피스 구현
 
 <br>
+
+### ⚡️ 주요 기능 소개
+
+#### [이용자] 실시간 팝업스토어 예약
+
+#### [운영자] 실시간 예약 내역 관리
+
+#### [관리자] 실시간 로그/헬스체크 모니터링
+
+<br>
+
+### 🛠️ 기술스택 및 선정 이유
+
+> [!NOTE]
+> 아키텍처 전반에 걸쳐 안정성, 확장성, 운영 효율성을 고려하여 기술 스택을 선정했습니다.  
+> 상세한 선정 이유는 [블로그 포스트](https://qriosity.dev)에서 확인하실 수 있습니다.
+
+#### 전체 아키텍처 도식
+
+#### 기술스택 목록
+
+<details>
+<summary>자세히 보기</summary>
+
+#### 애플리케이션
+- Spring Cloud API Gateway
+- Spring Cloud Service Discovery
+- Spring Cloud Eureka
+- Spring Logback
+- Spring JPA
+- Thymeleaf
+- Kafka
+- JWT
+
+#### 데이터베이스
+- MySQL
+- Redis
+
+#### 검색 및 로그 모니터링
+- Elasticsearch
+- Logstash
+- Kibana
+
+#### 인프라
+- AWS Lambda
+- AWS ELB
+- AWS IAM
+- AWS Route53
+- AWS Cloudfront
+- AWS EC2
+- AWS RDS
+- AWS S3
+
+#### DevOps
+- Docker Compose
+- GitHub Actions
+
+#### 테스트
+- JUnit
+- JMeter
+- Swagger
+- Postman
+
+#### 프로젝트 관리
+- Git
+- Trello
+- Slack
+- Figma
+
+</details>
+
+<br>
+
+### ⚡️ 트러블슈팅 및 회고
+
+프로젝트 진행 중 마주했던 다양한 이슈의 해결 과정과 생각들을 기술 블로그에서 만나보실 수 있습니다.
+
+- [컨테이너 환경의 Spring에서 발생한 CgroupInfo anyController is null 에러 회고](https://qriosity.dev/post/%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88-%ED%99%98%EA%B2%BD%EC%9D%98-spring%EC%97%90%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-cgroupinfo-anycontroller-is-null-%EC%97%90%EB%9F%AC-%ED%9A%8C%EA%B3%A0)
+- [Docker Compose와 Spring 멀티모듈: 환경별 프로퍼티 관리와 엔드포인트 이슈 해결기](https://qriosity.dev/post/docker-compose%EC%99%80-spring-%EB%A9%80%ED%8B%B0%EB%AA%A8%EB%93%88-%ED%99%98%EA%B2%BD%EB%B3%84-%ED%94%84%EB%A1%9C%ED%8D%BC%ED%8B%B0-%EA%B4%80%EB%A6%AC%EC%99%80-%EC%97%94%EB%93%9C%ED%8F%AC%EC%9D%B8%ED%8A%B8-%EC%9D%B4%EC%8A%88-%ED%95%B4%EA%B2%B0%EA%B8%B0)
