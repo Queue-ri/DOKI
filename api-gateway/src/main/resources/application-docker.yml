@@ -1,0 +1,78 @@
+server:
+  port: 9000
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  cloud:
+    default-filters:
+      - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+    globalcors:
+      cors-configurations:
+        '[/**]':
+          allowedOrigins:
+            - '*' # 허용하려는 도메인
+          allow-credentials: true # 요청 시 인증 정보를 전송하도록 허가
+          allowedHeaders: '*' # 허용하려는 헤더
+          allowedMethods: # 허용하려는 HTTP 메서드
+            - PUT
+            - GET
+            - POST
+            - DELETE
+            - OPTIONS
+    gateway:
+      routes:
+        ############## RESERVE-SERVICE ##############
+        ######## [reserve-service] REST APIs ########
+        - id: reserve-service
+          uri: http://reserve-service:9091 # 2) localhost:9000 말고 여기로 보내줌
+          predicates: # 1) 여기로 접속 시도하면
+            - Path=/v2/reserve/**
+
+        ############## COMMON-SERVICE ###############
+        ##### [common-service] Public Endpoints #####
+        - id: common-service
+          uri: http://common-service:9093
+          predicates:
+            - Path=/, /backdoor/**, /auth/**, /search, /store, /noti/**, /v1/auth/**, /v1/auth/**, /v1/store/**
+          filters:
+            - PublicFilter
+        ###### [common-service] Member Endpoints #####
+        - id: common-service
+          uri: http://common-service:9093
+          predicates:
+            - Path=/member/**, /reserve/**, /v1/member/**, /v1/reserve/**
+          filters:
+            - MemberAuthFilter
+        ###### [common-service] Manager Endpoints #####
+        - id: common-service
+          uri: http://common-service:9093
+          predicates:
+            - Path=/store/reserve/**
+          filters:
+            - ManagerAuthFilter
+        ###### [common-service] Admin Endpoints #####
+        - id: common-service
+          uri: http://common-service:9093
+          predicates:
+            - Path=/store/registration
+          filters:
+            - AdminAuthFilter
+        ########### static files ##############
+        - id: common-service
+          uri: http://common-service:9093
+          predicates:
+            - Path=/css/**, /js/**, /icon/**, /img/**
+
+      filter:
+        rewrite-path:
+          enabled: true
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://service-discovery:8761/eureka
