@@ -1,7 +1,7 @@
 // 예약은 서비스가 분리되어 있어서 API Gateway 없이 테스트 불가 (CORS 터짐)
-const API_GATEWAY_HOST = "http://localhost:9000"
+const API_GATEWAY_HOST = ""
 
-console.info('예약 방식:', reserveMethod);
+console.warn('예약 방식:', reserveMethod);
 
 /*
     예약 폼 유효성 검사 함수
