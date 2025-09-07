@@ -4,6 +4,7 @@ import com.ssginc.commonservice.backdoor.service.PerfTestReserveService;
 import com.ssginc.commonservice.reserve.dto.ReserveRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/backdoor/test/reserve")
+@Profile("test")
 public class PerfTestReserveRestController {
 
     private final PerfTestReserveService testService;
