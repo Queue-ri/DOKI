@@ -8,7 +8,7 @@ function load_page(pageIdx) {
 }
 
 function remove_filter() {
-    location.href = API_GATEWAY_HOST;
+    location.href = window.location.origin;
 }
 
 function goto_store_info(id) {
@@ -96,6 +96,6 @@ function clearUrlAddress() {
 
     // 주소창 조작
     // const nextURL = `http://localhost:9093/category?id=${categoryId}&page=${pageIdx}`;
-    const nextURL = API_GATEWAY_HOST; // 새로고침시
+    const nextURL = window.location.origin; // 새로고침시
     window.history.replaceState({}, '신세계백화점 팝업스토어 행사', nextURL);
 }
