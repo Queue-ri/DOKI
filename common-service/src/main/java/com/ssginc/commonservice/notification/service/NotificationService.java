@@ -46,7 +46,7 @@ public class NotificationService {
 
         // 2. 연결
         try {
-            sseEmitter.send(SseEmitter.event().name("connect"));
+            sseEmitter.send(SseEmitter.event().name("connect").data("connected"));
         } catch (IOException e) {
             e.printStackTrace();
         }
