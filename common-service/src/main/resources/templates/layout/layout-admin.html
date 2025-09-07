@@ -21,8 +21,13 @@
     <link href="/css/layout-admin.css" rel="stylesheet"/>
 
     <!-- global js (pre) -->
-    <script src="/js/layout-admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script th:inline="javascript">
+        const memberRole = [[${memberRole}]];
+        const memberCode = [[${memberCode}]];
+        const requestUuid = [[${requestUuid}]];
+    </script>
+    <script src="/js/layout-admin.js"></script>
 </head>
 <body>
 <div class="navbar">

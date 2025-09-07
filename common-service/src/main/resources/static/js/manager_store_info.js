@@ -1,8 +1,5 @@
 // layout-manager.js에 API_GATEWAY_HOST 이미 선언되어 있음.
 
-// 접속한 MANAGER의 memberCode 확인
-console.log('memberCode:', memberCode);
-
 
 function handleImageBoxClicked(event) {
     // img src 가져오기
