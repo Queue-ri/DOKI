@@ -9,5 +9,10 @@ spring:
     hibernate:
       ddl-auto: create
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 kafka:
-  endpoint: localhost:9092
+  host: localhost:9092
