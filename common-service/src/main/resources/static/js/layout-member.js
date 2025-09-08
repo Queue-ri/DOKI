@@ -1,33 +1,40 @@
 // 예약은 서비스가 분리되어 있어서 API Gateway 없이 테스트 불가 (CORS 터짐)
-const API_GATEWAY_HOST = "http://localhost:9000"
+const API_GATEWAY_HOST = ""
 
-/* 접속중인 이용자 정보 logging */
+/* 접속중인 사용자 정보 logging */
 console.warn("memberRole:", memberRole);
 console.warn("memberCode:", memberCode);
 console.warn("requestUuid:", requestUuid);
 
+/* 좌측 서비스 로고 버튼 클릭시 작동하는 함수 */
+function gotoRoot() {
+    location.href = window.location.origin;
+}
 
 /* 페이지 로딩시마다 알림 내역 가져오는 함수 */
-if (memberCode != null) { // 로그인 상태일때만 가져오기
-    axios.get(API_GATEWAY_HOST + "/noti/all"
-    ).then(function (response) {
-        console.log(response);
-        let notiList = response.data;
-        let notiCount = response.data.length;
-        if (notiCount > 0) {
-            let firstUnreadNoti = notiList[0]; // 가장 오래된 알림을 하나 읽어옴.
-            // 토스트 뷰 처리
-            const message = firstUnreadNoti.data;
-            const dateTime = moment(firstUnreadNoti.dateTime).format('YYYY-MM-DD HH:mm:ss'); // moment는 cdn으로 로드됨
+// 반드시 DOM 렌더링 후 작동해야 함 (안그러면 updateIndicator의 getElementById에서 null 터짐)
+document.addEventListener("DOMContentLoaded", () => {
+    if (memberCode != null) { // 로그인 상태일때만 가져오기
+        axios.get(API_GATEWAY_HOST + "/noti/all"
+        ).then(function (response) {
+            console.log(response);
+            let notiList = response.data;
+            let notiCount = response.data.length;
+            if (notiCount > 0) {
+                let firstUnreadNoti = notiList[0]; // 가장 오래된 알림을 하나 읽어옴.
+                // 토스트 뷰 처리
+                const message = firstUnreadNoti.data;
+                const dateTime = moment(firstUnreadNoti.dateTime).format('YYYY-MM-DD HH:mm:ss'); // moment는 cdn으로 로드됨
 
-            showAlarmToast(message, dateTime);
-            deleteReadAlarm(firstUnreadNoti.notificationId);
-        }
-    }).catch(function (error) {
-        console.log(error);
-        alert("알림을 가져오는데 실패했습니다.");
-    });
-}
+                showAlarmToast(message, dateTime);
+                deleteReadAlarm(firstUnreadNoti.notificationId);
+            }
+        }).catch(function (error) {
+            console.log(error);
+            alert("알림을 가져오는데 실패했습니다.");
+        });
+    }
+});
 
 // id가 nid인 알림 삭제
 async function deleteReadAlarm(nid) {
@@ -95,7 +102,7 @@ function signOut() {
         axios.delete(`${API_GATEWAY_HOST}/v1/auth/sign-out`
         ).then(function (response) {
             console.log(response);
-            location.href = '/';
+            window.location.replace("/");
         }).catch(function (error) {
             console.log(error);
             alert("서버와의 통신에 실패했습니다.");
@@ -103,7 +110,7 @@ function signOut() {
     }
 }
 
-/* 로그아웃 함수 */
+/* 회원가입 함수 */
 function signUp() {
     location.href = `${API_GATEWAY_HOST}/auth/sign-up`;
 }
@@ -158,11 +165,6 @@ function checkLoginAvailable() {
     }
 }
 
-/* 좌측 서비스 로고 버튼 클릭시 작동하는 함수 */
-function gotoRoot() {
-    location.href = "/";
-}
-
 /* '나의 예약' 버튼 클릭시 작동하는 함수 */
 function gotoMyReservationPage() {
     if (memberRole !== 'MEMBER') {
@@ -192,7 +194,7 @@ if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상�
         console.log('Received message:', event.data); // logging
 
         // 현재의 URL에 따른 동적 뷰 처리
-        if (window.location.href === `${API_GATEWAY_HOST}/member/reserve`) { // 1. 나의 예약 페이지면
+        if (window.location.href === `${window.location.origin}/member/reserve`) { // 1. 나의 예약 페이지면
             console.log('이벤트 수신 -> 나의 예약 테이블 업데이트');
             updateView();
         }

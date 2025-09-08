@@ -1,23 +1,30 @@
 // 예약은 서비스가 분리되어 있어서 API Gateway 없이 테스트 불가 (CORS 터짐)
-const API_GATEWAY_HOST = "http://localhost:9000"
+const API_GATEWAY_HOST = ""
+
+/* 접속중인 사용자 정보 logging */
+console.warn("memberRole:", memberRole);
+console.warn("memberCode:", memberCode);
+console.warn("requestUuid:", requestUuid);
 
 /* 페이지 로딩시마다 알림 내역 가져오는 함수 */
-axios.get(API_GATEWAY_HOST + "/noti/all"
-).then(function (response) {
-    console.log(response);
-    notiList = response.data
-    notiCount = response.data.length;
-    if (notiCount > 0) {
-        updateIndicator();
-        notiList.forEach(noti => {
-            addSingleElementToAlarmList(noti.data, noti.dateTime);
-        });
-    }
-}).catch(function (error) {
-    console.log(error);
-    alert("알림을 가져오는데 실패했습니다.");
+// 반드시 DOM 렌더링 후 작동해야 함 (안그러면 updateIndicator의 getElementById에서 null 터짐)
+document.addEventListener("DOMContentLoaded", () => {
+    axios.get(API_GATEWAY_HOST + "/noti/all"
+    ).then(function (response) {
+        console.log(response);
+        notiList = response.data
+        notiCount = response.data.length;
+        if (notiCount > 0) {
+            updateIndicator();
+            notiList.forEach(noti => {
+                addSingleElementToAlarmList(noti.data, noti.dateTime);
+            });
+        }
+    }).catch(function (error) {
+        console.log(error);
+        alert("알림을 가져오는데 실패했습니다.");
+    });
 });
-
 
 function signOut() {
     const ok = confirm("로그아웃 하시겠습니까?");
@@ -25,7 +32,7 @@ function signOut() {
         axios.delete(API_GATEWAY_HOST + "/v1/auth/sign-out"
         ).then(function (response) {
             console.log(response);
-            location.replace(API_GATEWAY_HOST); // 팝업스토어 목록 조회 페이지로 이동
+            window.location.replace("/");
         }).catch(function (error) {
             console.log(error);
             alert("서버와의 통신에 실패했습니다.");
@@ -34,13 +41,13 @@ function signOut() {
 }
 
 function gotoRoot() {
-    location.href = "/";
+    location.href = window.location.origin;
 }
 
 /* sidebar 메뉴 클릭시 페이지 이동하는 용도 */
 function gotoPage(idx) {
     switch (idx) {
-        case 0: location.href = API_GATEWAY_HOST; break;
+        case 0: gotoRoot(); break;
         case 1: location.href = API_GATEWAY_HOST; break;
         case 2: location.href = API_GATEWAY_HOST; break;
         case 3: location.href = API_GATEWAY_HOST + "/store/reserve"; break;
@@ -118,6 +125,11 @@ eventSource.addEventListener("RESERVE_REQUEST", (event) => {
     // 2. 알림 리스트 뷰에 element 추가
     addSingleElementToAlarmList(message, dateTime);
 
+    // 3. 현재의 URL에 따른 동적 뷰 처리
+    if (window.location.href === `${window.location.origin}/store/reserve`) { // 1. 예약 승인 / 예약 취소 페이지면
+        console.log('이벤트 수신 -> 메트릭 & 예약 테이블 업데이트');
+        updateView(); // 메트릭, 테이블 뷰 업데이트
+    }
 });
 
 function updateIndicator() {

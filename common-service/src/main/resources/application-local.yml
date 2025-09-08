@@ -1,9 +1,17 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/pjt3?&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/doki?&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: Abcd123!
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    elasticsearch:
+      repositories:
+        enabled: true # ElasticSearchRepository 사용
 
   mail:
     host: smtp.gmail.com
@@ -22,8 +30,11 @@ spring:
     hibernate:
       ddl-auto: create
 
+kafka:
+  host: localhost:9092
+
 elasticsearch:
-  host: 34.47.118.187:9200
+  host: localhost:9200
   username: elastic
   password: Abcd123!
 

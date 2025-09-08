@@ -113,28 +113,29 @@ jobs:
         docker push ghcr.io/${GHCR_REPO}_reserve-service:latest
         docker push ghcr.io/${GHCR_REPO}_common-service:latest
 
-  deploy-ec2:
-    name: Deploy Containers to EC2
-    runs-on: ubuntu-latest
-    needs: docker-push
-    steps:
-    - name: Setup SSH connection to EC2
-      run: |
-        touch pjt3-ec2.pem
-        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" >> pjt3-ec2.pem
-        chmod 600 pjt3-ec2.pem
-        eval $(ssh-agent -s)
-        ssh-add pjt3-ec2.pem
-        mkdir ~/.ssh
-        touch ~/.ssh/known_hosts
-        ssh-keyscan -H "${{ secrets.EC2_URL }}" >> ~/.ssh/known_hosts
+  # CI 배포는 1.1.0에 재적용 예정
+  # deploy-ec2:
+  #   name: Deploy Containers to EC2
+  #   runs-on: ubuntu-latest
+  #   needs: docker-push
+  #   steps:
+  #   - name: Setup SSH connection to EC2
+  #     run: |
+  #       touch pjt3-ec2.pem
+  #       echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" >> pjt3-ec2.pem
+  #       chmod 600 pjt3-ec2.pem
+  #       eval $(ssh-agent -s)
+  #       ssh-add pjt3-ec2.pem
+  #       mkdir ~/.ssh
+  #       touch ~/.ssh/known_hosts
+  #       ssh-keyscan -H "${{ secrets.EC2_URL }}" >> ~/.ssh/known_hosts
 
-    - name: Get Deployer Script
-      run: wget https://raw.githubusercontent.com/ssginc-be/DOKI/main/.github/deployer.sh
+  #   - name: Get Deployer Script
+  #     run: wget https://raw.githubusercontent.com/ssginc-be/DOKI/main/.github/deployer.sh
     
-    - name: Run Deployer
-      run: ssh -i pjt3-ec2.pem ubuntu@${{ secrets.EC2_URL }} -T sh < deployer.sh # prevent pseudo terminal
+  #   - name: Run Deployer
+  #     run: ssh -i pjt3-ec2.pem ubuntu@${{ secrets.EC2_URL }} -T sh < deployer.sh # prevent pseudo terminal
 
-    # cleanup script file
-    - name: Remove Deployer Script
-      run: rm deployer.sh
+  #   # cleanup script file
+  #   - name: Remove Deployer Script
+  #     run: rm deployer.sh

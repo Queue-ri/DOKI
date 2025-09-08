@@ -23,11 +23,13 @@
     <!-- global js (pre) -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
-    <script src="/js/layout-manager.js"></script>
     <script th:inline="javascript">
-        let memberCode = [[${memberCode}]];
-        let memberName = [[${memberName}]];
+        const memberRole = [[${memberRole}]];
+        const memberCode = [[${memberCode}]];
+        const memberName = [[${memberName}]];
+        const requestUuid = [[${requestUuid}]];
     </script>
+    <script src="/js/layout-manager.js"></script>
 </head>
 <body>
 <div class="navbar">

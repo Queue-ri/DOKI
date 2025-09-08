@@ -1,4 +1,4 @@
-const API_GATEWAY_HOST = "http://localhost:9000";
+const API_GATEWAY_HOST = "";
 
 /*
     가입시 사용하는 전역 변수

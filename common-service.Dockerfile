@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 ARG JAR_FILE=common-service/build/libs/*.jar
 COPY ${JAR_FILE} app.jar
 ENTRYPOINT [ \

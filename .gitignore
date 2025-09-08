@@ -54,3 +54,6 @@ lambda-image-resize/node_modules/*
 
 ### Gradle configuration file ###
 gradle.properties
+
+### Environment Variable file ###
+.env
