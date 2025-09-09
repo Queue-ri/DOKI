@@ -109,7 +109,7 @@ public class NotificationService {
                                 .member(memberOpt.get())
                                 .notiType(NotificationType.RESERVE_RESULT)
                                 .data(message)
-                                .dateTime(LocalDateTime.now())
+                                .createdAt(LocalDateTime.now())
                                 .build()
                 );
 
@@ -151,7 +151,7 @@ public class NotificationService {
                                 .member(memberOpt.get())
                                 .notiType(NotificationType.RESERVE_RESULT)
                                 .data(message)
-                                .dateTime(LocalDateTime.now())
+                                .createdAt(LocalDateTime.now())
                                 .build()
                 );
 
@@ -194,7 +194,7 @@ public class NotificationService {
                                 .member(memberOpt.get())
                                 .notiType(NotificationType.RESERVE_REQUEST)
                                 .data(message)
-                                .dateTime(LocalDateTime.now())
+                                .createdAt(LocalDateTime.now())
                                 .build()
                 );
 

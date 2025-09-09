@@ -37,6 +37,11 @@ public class Notification {
     private String data;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private NotificationStatus status = NotificationStatus.UNREAD;
+
+    @Column(nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime dateTime;
+    private LocalDateTime createdAt;
 }
