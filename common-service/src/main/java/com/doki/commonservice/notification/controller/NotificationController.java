@@ -28,7 +28,7 @@ public class NotificationController {
     */
     private final JwtUtil jwtUtil;
     private final NotificationService notificationService;
-    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+    public static Map<Long, List<SseEmitter>> sseEmitters = new ConcurrentHashMap<>();
 
     /* 로그인 유저 대상 SSE 연결 */
     @GetMapping("/subscribe")
