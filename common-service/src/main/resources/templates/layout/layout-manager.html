@@ -37,24 +37,30 @@
         <div class="navbar-logo" th:onclick="gotoRoot()">DOKI</div>
         <div class="navbar-sub-logo">MANAGER</div>
 
-        <div class="navbar-bell-box" onclick="toggleAlertListBox()"><img id="navbar-bell-icon" th:src="@{/icon/layout/bell_off_dark.svg}"></div>
-        <div class="navbar-alert-box" id="navbar-alert-box">새로운 알림이 없습니다.</div>
-        <!-- 알림 버튼 클릭시 보여지는 알림 목록 -->
-        <div class="navbar-alert-list-box" id="navbar-alert-list-box">
-            <!-- 하단 구문 안쓰고 axios로 가져옴 -->
-<!--            <th:block th:if="${notiCount > 0}" th:each="n : ${notiList}">-->
-<!--                <div class="navbar-alert-element">-->
-<!--                    <div class="navbar-alert-element-data" th:text="${n.data}"></div>-->
-<!--                    <div class="navbar-alert-element-time" th:text="${n.dateTime}"></div>-->
-<!--                </div>-->
-<!--            </th:block>-->
+        <div class="navbar-bell-box" onclick="toggleAlertListBox()">
+            <img id="navbar-bell-icon" th:src="@{/icon/layout/bell_off_dark.svg}">
+            <!-- 알림 버튼 클릭시 보여지는 알림 목록 -->
+            <div class="navbar-alert-list-box" id="navbar-alert-list-box">
+                <!-- 하단 구문 안쓰고 axios로 가져옴 -->
+<!--                <th:block th:if="${notiCount > 0}" th:each="n : ${notiList}">-->
+<!--                    <div class="navbar-alert-element">-->
+<!--                        <div class="navbar-alert-content-box">-->
+<!--                            <div class="navbar-alert-element-title" th:text="${n.title}"></div>-->
+<!--                            <div class="navbar-alert-element-message" th:text="${n.message}"></div>-->
+<!--                            <div class="navbar-alert-element-createdAt" th:text="${n.createdAt}"></div>-->
+<!--                        </div>-->
+<!--                        <div class="navbar-alert-delete-button"><img id="noti-delete" th:src="@{/icon/layout/noti_delete.svg}"></div>-->
+<!--                    </div>-->
+<!--                </th:block>-->
+            </div>
         </div>
+        <div class="navbar-alert-box" id="navbar-alert-box">새로운 알림이 없습니다.</div>
 
         <div class="navbar-menu">
             <div class="navbar-menu-button" th:if="${memberRole != null}" onclick="signOut()">로그아웃</div>
         </div>
         <div class="navbar-store">
-            <div class="store-name-text" th:text="${storeName}">체이싱래빗 in 신세계백화점</div>
+            <div class="store-name-text" th:text="${storeName}">체이싱래빗 in 롯데백화점</div>
         </div>
     </div>
 </div>

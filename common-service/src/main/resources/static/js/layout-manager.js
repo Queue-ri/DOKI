@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (notiCount > 0) {
             updateIndicator();
             notiList.forEach(noti => {
-                addSingleElementToAlarmList(noti.data, noti.dateTime);
+                addSingleElementToAlarmList(JSON.parse(noti.data));
             });
         }
     }).catch(function (error) {
@@ -62,20 +62,30 @@ function gotoPage(idx) {
 /* 알림 버튼 클릭시 동작하는 함수 */
 function toggleAlertListBox() {
     const div = document.getElementById('navbar-alert-list-box');
+    const isOpen = div.classList.toggle('open');
 
-    if (div.style.visibility === 'visible')  {
-        div.style.visibility = 'hidden';
-    } else {
-        div.style.visibility = 'visible';
-
-        // 모든 알림 읽음 처리 (삭제)
-        axios.delete(API_GATEWAY_HOST + "/noti/all"
-        ).then(function (response) {
-            console.log(response);
-        }).catch(function (error) {
-            console.log(error);
-            alert("서버와의 통신에 실패했습니다.");
-        });
+    if (isOpen) {
+        // 알림 개수에 따라 가변 max-height 처리
+        if (div.children.length === 0) {
+            div.style.minHeight = '100px'; // 알림 없으면 최소 100px 펼쳐짐
+        }
+        else {
+            div.style.maxHeight = '350px'; // 알림 있으면 최대 350px 펼쳐짐
+        }
+        // 알림 리스트가 열렸을 때만 API 호출
+        axios.delete(API_GATEWAY_HOST + "/noti/all")
+            .then(function (response) {
+                console.log(response);
+            })
+            .catch(function (error) {
+                console.log(error);
+                alert("서버와의 통신에 실패했습니다.");
+            });
+    }
+    else {
+        // 닫힘
+        div.style.minHeight = '0';
+        div.style.maxHeight = '0';
     }
 }
 
@@ -118,12 +128,11 @@ eventSource.addEventListener("RESERVE_REQUEST", (event) => {
 
     // 뷰 업데이트
     // 1. 인디케이터 뷰 업데이트
-    const message = event.data;
-    const dateTime = moment(event.start).format('YYYY-MM-DD HH:mm:ss'); // moment는 cdn으로 로드됨
     updateIndicator();
 
     // 2. 알림 리스트 뷰에 element 추가
-    addSingleElementToAlarmList(message, dateTime);
+    const data = JSON.parse(event.data);
+    addSingleElementToAlarmList(data);
 
     // 3. 현재의 URL에 따른 동적 뷰 처리
     if (window.location.href === `${window.location.origin}/store/reserve`) { // 1. 예약 승인 / 예약 취소 페이지면
@@ -140,22 +149,44 @@ function updateIndicator() {
     bellBoxImg.src = "/icon/layout/bell_on_dark.svg";
 }
 
-function addSingleElementToAlarmList(message, dateTime) {
+function addSingleElementToAlarmList(data) {
     const alertListBoxDiv = document.getElementById("navbar-alert-list-box");
 
-    const alertElementDiv = document.createElement("div")
+    const alertElementDiv = document.createElement("div");
     alertElementDiv.classList.add('navbar-alert-element');
 
-    const alertElementDataDiv = document.createElement("div")
-    alertElementDataDiv.classList.add('navbar-alert-element-data');
-    alertElementDataDiv.appendChild(document.createTextNode(message));
+    const alertElementContentBoxDiv = document.createElement("div");
+    alertElementContentBoxDiv.classList.add('navbar-alert-content-box');
 
-    const alertElementTimeDiv = document.createElement("div")
-    alertElementTimeDiv.classList.add('navbar-alert-element-time');
-    alertElementTimeDiv.appendChild(document.createTextNode(dateTime));
+    // alert content
+    const alertElementTitleDiv = document.createElement("div");
+    alertElementTitleDiv.classList.add('navbar-alert-element-title');
+    const formattedDateTime = moment(data.reservedDateTime).format("YYYY-MM-DD HH:mm");
+    alertElementTitleDiv.appendChild(document.createTextNode(formattedDateTime));
 
-    alertElementDiv.appendChild(alertElementDataDiv);
-    alertElementDiv.appendChild(alertElementTimeDiv);
+    const alertElementMessageDiv = document.createElement("div");
+    alertElementMessageDiv.classList.add('navbar-alert-element-message');
+    alertElementMessageDiv.appendChild(document.createTextNode(data.message));
+
+    const alertElementCreatedAtDiv = document.createElement("div");
+    alertElementCreatedAtDiv.classList.add('navbar-alert-element-createdAt');
+    alertElementCreatedAtDiv.appendChild(document.createTextNode(data.createdAt));
+
+    // delete button
+    const alertDeleteButtonDiv = document.createElement("div");
+    alertDeleteButtonDiv.classList.add('navbar-alert-delete-button');
+    const deleteImg = document.createElement("img");
+    deleteImg.id = "noti-delete";
+    deleteImg.src = "/icon/layout/noti_delete.svg";
+    alertDeleteButtonDiv.appendChild(deleteImg);
+
+    // append
+    alertElementContentBoxDiv.appendChild(alertElementTitleDiv);
+    alertElementContentBoxDiv.appendChild(alertElementMessageDiv);
+    alertElementContentBoxDiv.appendChild(alertElementCreatedAtDiv);
+
+    alertElementDiv.appendChild(alertElementContentBoxDiv);
+    alertElementDiv.appendChild(alertDeleteButtonDiv);
 
     alertListBoxDiv.appendChild(alertElementDiv);
 }
