@@ -11,9 +11,10 @@ function gotoRoot() {
     location.href = window.location.origin;
 }
 
-/* 페이지 로딩시마다 알림 내역 가져오는 함수 */
-// 반드시 DOM 렌더링 후 작동해야 함 (안그러면 updateIndicator의 getElementById에서 null 터짐)
+/* DOM 렌더링 후 실행되어야 하는 로직 */
 document.addEventListener("DOMContentLoaded", () => {
+    /* 페이지 로딩시마다 알림 내역 가져오는 함수 */
+    // 반드시 DOM 렌더링 후 작동해야 함 (안그러면 updateIndicator의 getElementById에서 null 터짐)
     if (memberCode != null) { // 로그인 상태일때만 가져오기
         axios.get(API_GATEWAY_HOST + "/noti/all"
         ).then(function (response) {
@@ -23,10 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (notiCount > 0) {
                 let firstUnreadNoti = notiList[0]; // 가장 오래된 알림을 하나 읽어옴.
                 // 토스트 뷰 처리
-                const message = firstUnreadNoti.data;
-                const dateTime = moment(firstUnreadNoti.dateTime).format('YYYY-MM-DD HH:mm:ss'); // moment는 cdn으로 로드됨
-
-                showAlarmToast(message, dateTime);
+                const data = JSON.parse(firstUnreadNoti.data);
+                showAlarmToast(data);
                 deleteReadAlarm(firstUnreadNoti.notificationId);
             }
         }).catch(function (error) {
@@ -34,6 +33,45 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("알림을 가져오는데 실패했습니다.");
         });
     }
+
+
+    /* navbar hide animation */
+    const navbar = document.getElementById('navbar');
+    if (!navbar) return;
+
+    let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    // 페이지 로드 시 스크롤 위치 확인
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop === 0) {
+        // 맨 위에서 로드: 무조건 show
+        navbar.classList.remove('hide');
+    } else {
+        // 세션 상태를 적용
+        const savedState = sessionStorage.getItem('navbar-hide');
+        if (savedState === 'true') {
+            navbar.classList.add('hide');
+        } else {
+            navbar.classList.remove('hide');
+        }
+    }
+
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (currentScroll > lastScrollTop) {
+            // 아래로 스크롤: hide
+            navbar.classList.add('hide');
+            sessionStorage.setItem('navbar-hide', 'true');
+        } else if (currentScroll < lastScrollTop) {
+            // 위로 스크롤: show
+            navbar.classList.remove('hide');
+            sessionStorage.setItem('navbar-hide', 'false');
+        }
+
+        lastScrollTop = Math.max(0, currentScroll);
+    });
 });
 
 // id가 nid인 알림 삭제
@@ -200,36 +238,61 @@ if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상�
         }
 
         // 토스트 뷰 처리
-        const message = event.data;
-        const dateTime = moment(event.start).format('YYYY-MM-DD HH:mm:ss'); // moment는 cdn으로 로드됨
-
-        showAlarmToast(message, dateTime);
+        const data = JSON.parse(event.data);
+        showAlarmToast(data);
     });
 
     // 토스트 뷰 컨트롤
-    function showAlarmToast(message, dateTime) {
+    function showAlarmToast(data) {
         console.log('show toast'); // logging
         // parent div (toast box)
         const notiToastBoxDiv = document.getElementById('noti-toast-box');
+        switch (data.messageCode) {
+            case 'RESERVE_PENDING': default: notiToastBoxDiv.style.border = "1px solid #232323"; break;
+            case 'CONFIRMED': notiToastBoxDiv.style.border = "1px solid #134CFF"; break;
+            case 'REFUSED': case 'CANCELED': notiToastBoxDiv.style.border = "1px solid #FA6F77"; break;
+        }
+
+        // icon box
+        const notiToastIconBoxDiv = document.getElementById('noti-toast-icon-box');
+        switch (data.messageCode) {
+            case 'RESERVE_PENDING': default: notiToastIconBoxDiv.style.backgroundColor = "rgba(35, 35, 35, 0.9)"; break;
+            case 'CONFIRMED': notiToastIconBoxDiv.style.backgroundColor = "rgba(19, 76, 255, 0.8)"; break;
+            case 'REFUSED': case 'CANCELED': notiToastIconBoxDiv.style.backgroundColor = "rgba(250, 111, 119, 0.9)"; break;
+        }
+
+        // icon img
+        const iconImg = document.getElementById('noti-toast-icon');
+        switch (data.messageCode) {
+            case 'REFUSED': case 'CANCELED': iconImg.src = '/icon/layout/calendar_no.svg'; break;
+            default: iconImg.src = '/icon/layout/calendar_yes.svg'; break;
+        }
 
         // old div
-        const notiToastDataDiv = document.getElementById('noti-toast-data');
-        const notiToastDatetimeDiv = document.getElementById('noti-toast-datetime');
+        const titleDiv = document.getElementById('noti-toast-data-title');
+        const messageDiv = document.getElementById('noti-toast-data-message');
+        const createdAtDiv = document.getElementById('noti-toast-data-createdAt');
 
         // new div
-        const newDataDiv = document.createElement("div");
-        newDataDiv.classList.add('noti-toast-data');
-        newDataDiv.id = 'noti-toast-data';
-        newDataDiv.appendChild(document.createTextNode(message));
+        const newTitleDiv = document.createElement("div");
+        newTitleDiv.classList.add('noti-toast-data-title');
+        newTitleDiv.id = 'noti-toast-data-title';
+        newTitleDiv.appendChild(document.createTextNode(data.storeName));
 
-        const newDatetimeDiv = document.createElement("div");
-        newDatetimeDiv.classList.add('noti-toast-datetime');
-        newDatetimeDiv.id = 'noti-toast-datetime';
-        newDatetimeDiv.appendChild(document.createTextNode(dateTime));
+        const newMessageDiv = document.createElement("div");
+        newMessageDiv.classList.add('noti-toast-data-message');
+        newMessageDiv.id = 'noti-toast-data-message';
+        newMessageDiv.appendChild(document.createTextNode(data.message));
+
+        const newCreatedAtDiv = document.createElement("div");
+        newCreatedAtDiv.classList.add('noti-toast-data-createdAt');
+        newCreatedAtDiv.id = 'noti-toast-data-createdAt';
+        newCreatedAtDiv.appendChild(document.createTextNode(data.createdAt));
 
         // div 교체
-        notiToastDataDiv.replaceWith(newDataDiv);
-        notiToastDatetimeDiv.replaceWith(newDatetimeDiv);
+        titleDiv.replaceWith(newTitleDiv);
+        messageDiv.replaceWith(newMessageDiv);
+        createdAtDiv.replaceWith(newCreatedAtDiv);
 
         // 토스트 박스 보여주기
         notiToastBoxDiv.classList.add("active");
