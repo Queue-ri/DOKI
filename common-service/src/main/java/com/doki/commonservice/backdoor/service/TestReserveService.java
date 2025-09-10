@@ -82,7 +82,7 @@ public class TestReserveService {
 
         // 이용자 -> 운영자에게 예약 자동 승인 알림
         // 예약 V2는 자동 승인됨.
-        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), dto.getReservedDateTime(), "AUTO_CONFIRMED");
+        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), reservation, "AUTO_CONFIRMED");
     }
 
     @Transactional
@@ -127,7 +127,7 @@ public class TestReserveService {
 
         // 이용자 -> 운영자에게 예약 자동 승인 알림
         // 예약 V2는 자동 승인됨.
-        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), dto.getReservedDateTime(), "AUTO_CONFIRMED");
+        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), reservation, "AUTO_CONFIRMED");
     }
 
     /************************************************************************************
