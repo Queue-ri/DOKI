@@ -35,7 +35,7 @@
         <div class="navbar-logo" onclick="gotoRoot()">DOKI</div>
         <div class="navbar-searchbar" th:style="${memberRole == null ? 'width: 480px;' : 'width: 400px;'}">
             <input id="searchbar-input" type="text" placeholder="검색어를 입력해주세요." />
-            <div class="searchbar-button" onclick="search()"><img th:src="@{/icon/layout/search.svg}"></div>
+            <div class="searchbar-button" onclick="search()"><img th:src="${cdnDomain + '/static/icon/layout/search.svg'}"></div>
         </div>
         <div class="navbar-menu">
             <div class="menu-button" th:if="${memberRole != null}" th:onclick="|gotoMyReservationPage()|">나의 예약</div>
@@ -57,7 +57,7 @@
         </div>
         <div class="navbar-branch">
             <div class="branch-text">롯데백화점 잠실점</div>
-            <div class="branch-icon"><img th:src="@{/icon/layout/branch_arrow.svg}"></div>
+            <div class="branch-icon"><img th:src="${cdnDomain + '/static/icon/layout/branch_arrow.svg'}"></div>
         </div>
     </div>
 </div>
@@ -70,7 +70,7 @@
 <!-- 하단은 테스트용이고 프로덕션에서는 JS로 동적 생성되는 코드임. -->
 <div class="noti-toast-viewbox"> <!-- viewbox 밖으로 벗어난 toast box는 보이지 않음 -->
     <div class="noti-toast-box" id="noti-toast-box">
-        <div class="noti-toast-icon-box" id="noti-toast-icon-box"><img id="noti-toast-icon" th:src="@{/icon/layout/calendar_yes.svg}"></div>
+        <div class="noti-toast-icon-box" id="noti-toast-icon-box"><img id="noti-toast-icon" th:src="${cdnDomain + '/static/icon/layout/calendar_yes.svg'}"></div>
         <div class="noti-toast-data-box">
             <div class="noti-toast-data-title" id="noti-toast-data-title">[팝업스토어명]</div>
             <div class="noti-toast-data-message" id="noti-toast-data-message">알림 메시지 내용</div>
@@ -107,15 +107,15 @@
                         <div class="footer-submenu-text">윤리 핫라인</div>
                     </div>
                 </div>
-                <div class="brand-icon"><img th:src="@{/icon/layout/lotte_mall.svg}"></div>
-                <div class="brand-icon"><img th:src="@{/icon/layout/timevillas.svg}"></div>
-                <div class="brand-icon"><img th:src="@{/icon/layout/conran_shop.svg}"></div>
+                <div class="brand-icon"><img th:src="${cdnDomain + '/static/icon/layout/lotte_mall.svg'}"></div>
+                <div class="brand-icon"><img th:src="${cdnDomain + '/static/icon/layout/timevillas.svg'}"></div>
+                <div class="brand-icon"><img th:src="${cdnDomain + '/static/icon/layout/conran_shop.svg'}"></div>
                 <div class="icon-box">
-                    <div class="icon-button"><img th:src="@{/icon/layout/naver.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/facebook.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/instagram.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/youtube.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/github.svg}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/naver.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/facebook.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/instagram.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/youtube.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/github.svg'}"></div>
                 </div>
             </div>
         </div>

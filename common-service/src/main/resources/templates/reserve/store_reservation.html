@@ -33,7 +33,7 @@
     <!-- 팝업스토어 정보 (floating) -->
     <div class="reservation-top">
         <div class="tiny-navbar">
-            <div class="left-arrow-button" th:onclick="goBack()"><img th:src="@{/icon/store/left_arrow.svg}"></div>
+            <div class="left-arrow-button" th:onclick="goBack()"><img th:src="${cdnDomain + '/static/icon/store/left_arrow.svg'}"></div>
             <div class="navbar-page-title" th:text="${store.getStoreName()}"></div>
         </div>
         <div class="store-info-box">

@@ -36,12 +36,12 @@
                 </div>
 
                 <div class="preview-button" th:onclick="|handlePreviewButtonClicked(${store.getStoreId()})|">
-                    <div class="preview-icon-box"><img th:src="@{/icon/manager/preview_phone.svg}"></div>
+                    <div class="preview-icon-box"><img th:src="${cdnDomain + '/static/icon/manager/preview_phone.svg'}"></div>
                     <div class="preview-text-box">
                         <div class="preview-title">상세 페이지 미리보기</div>
                         <div class="preview-subtitle">고객이 보는 화면이에요</div>
                     </div>
-                    <img class="preview-arrow" th:src="@{/icon/manager/preview_arrow.svg}">
+                    <img class="preview-arrow" th:src="${cdnDomain + '/static/icon/manager/preview_arrow.svg'}">
                 </div>
             </div>
 

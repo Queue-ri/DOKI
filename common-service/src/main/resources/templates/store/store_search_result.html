@@ -47,14 +47,14 @@
         </div>
 
         <div class="pagination-box" id="pagination-box">
-            <div class="pagination-left"><img th:src="@{/icon/store/pagination_left.svg}"></div>
+            <div class="pagination-left"><img th:src="${cdnDomain + '/static/icon/store/pagination_left.svg'}"></div>
             <div class="page-button-box" id="page-button-box">
                 <th:block th:each="num : ${#numbers.sequence(1,page.getTotalPages())}">
                     <div class="page-button-selected" th:if="${num == page.getPageNumber()+1}" th:text="${num}"></div>
                     <div class="page-button" th:if="${num != page.getPageNumber()+1}" th:text="${num}" onclick="loadPage(this)"></div>
                 </th:block>
             </div>
-            <div class="pagination-right"><img th:src="@{/icon/store/pagination_right.svg}"></div>
+            <div class="pagination-right"><img th:src="${cdnDomain + '/static/icon/store/pagination_right.svg'}"></div>
         </div>
     </div>
 </div>

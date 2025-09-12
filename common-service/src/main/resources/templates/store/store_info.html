@@ -22,13 +22,13 @@
     <div class="wrapper">
         <div class="carousel-area">
             <div class="carousel-container">
-                <div id="carousel-left-button" class="carousel-button"><img th:src="@{/icon/store/carousel_left.svg}"></div>
+                <div id="carousel-left-button" class="carousel-button"><img th:src="${cdnDomain + '/static/icon/store/carousel_left.svg'}"></div>
                 <div class="carousel-image-container">
                     <th:block th:each="image : ${contentDetailList}">
                         <div class="carousel-image-box" onclick="handleImageBoxClicked(this)"><img th:src="${image.getStoreImageLink()}" alt="상세 이미지"></div>
                     </th:block>
                 </div>
-                <div id="carousel-right-button" class="carousel-button"><img th:src="@{/icon/store/carousel_right.svg}"></div>
+                <div id="carousel-right-button" class="carousel-button"><img th:src="${cdnDomain + '/static/icon/store/carousel_right.svg'}"></div>
             </div>
 
             <!----------------- 상단 영역 ------------------>
@@ -48,14 +48,14 @@
             <!----------------- 중앙 영역 ------------------>
             <div class="store-detail-middle">
                 <div class="time-box">
-                    <img class="time-icon" th:src="@{/icon/store/time_clock.svg}">
+                    <img class="time-icon" th:src="${cdnDomain + '/static/icon/store/time_clock.svg'}">
                     <div class="time-text-box">
                         <div class="time-title">운영 시간</div>
                         <div class="time-content" th:text="|매일: ${store.getStoreStartTime()} ~ ${store.getStoreEndTime()}|"></div>
                     </div>
                 </div>
                 <div class="store-at-box">
-                    <img class="store-at-icon" th:src="@{/icon/store/place_pin.svg}">
+                    <img class="store-at-icon" th:src="${cdnDomain + '/static/icon/store/place_pin.svg'}">
                     <div class="store-at-text-box">
                         <div class="store-at-title">운영 장소</div>
                         <div class="store-at-content">

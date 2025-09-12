@@ -15,6 +15,7 @@ import com.doki.commonservice.util.PageResponseDto;
 import com.doki.commonservice.util.RequestInfoDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,9 @@ public class StoreController {
     private final StoreIndexService storeIndexService; // Elasticsearch
     private final MemberService memberService;
 
+    @Value("${cloud.aws.cloudfront.domain}")
+    private String cdnDomain;
+
     /* 메인 페이지 */
     @GetMapping
     public String viewStoreList(
@@ -59,6 +63,8 @@ public class StoreController {
         String role = requestInfo.getMemberRole();
         model.addAttribute("memberCode", requestInfo.getMemberCode());
         model.addAttribute("requestUuid", requestInfo.getRequestUuid());
+
+        model.addAttribute("cdnDomain", cdnDomain);
 
         // 1. 비회원이거나 로그인한 이용자 (null 체크가 조건식 앞에 있어야 함)
         if (role == null || role.equals("MEMBER")) {
@@ -131,6 +137,7 @@ public class StoreController {
         model.addAttribute("memberCode", requestInfo.getMemberCode());
         model.addAttribute("requestUuid", requestInfo.getRequestUuid());
 
+        model.addAttribute("cdnDomain", cdnDomain);
         model.addAttribute("keyword", keyword);
 
         if (pageIdx == null) pageIdx = 0; // 별도의 pageIdx가 주어지지 않으면 기본값으로 첫 페이지 조회
@@ -156,6 +163,8 @@ public class StoreController {
         model.addAttribute("memberRole", requestInfo.getMemberRole()); // null 또는 MEMBER
         model.addAttribute("memberCode", requestInfo.getMemberCode());
         model.addAttribute("requestUuid", requestInfo.getRequestUuid());
+
+        model.addAttribute("cdnDomain", cdnDomain);
 
         boolean isPreview = false; // 미리보기 모드 플래그
         if (accessToken != null) isPreview = requestInfo.getMemberRole().equals("MANAGER");
@@ -188,6 +197,8 @@ public class StoreController {
         model.addAttribute("memberCode", requestInfo.getMemberCode());
         model.addAttribute("requestUuid", requestInfo.getRequestUuid());
 
+        model.addAttribute("cdnDomain", cdnDomain);
+
         Store store = memberService.getMemberInfo(requestInfo.getMemberCode()).getStore();
         model.addAttribute("storeName", store.getStoreName());
 
@@ -208,6 +219,8 @@ public class StoreController {
         model.addAttribute("memberRole", requestInfo.getMemberRole()); // null 또는 MEMBER
         model.addAttribute("memberCode", requestInfo.getMemberCode());
         model.addAttribute("requestUuid", requestInfo.getRequestUuid());
+
+        model.addAttribute("cdnDomain", cdnDomain);
 
         Store store = memberService.getMemberInfo(requestInfo.getMemberCode()).getStore();
         model.addAttribute("storeName", store.getStoreName());

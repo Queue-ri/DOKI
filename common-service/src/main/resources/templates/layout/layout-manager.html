@@ -38,7 +38,7 @@
         <div class="navbar-sub-logo">MANAGER</div>
 
         <div class="navbar-bell-box" onclick="toggleAlertListBox()">
-            <img id="navbar-bell-icon" th:src="@{/icon/layout/bell_off_dark.svg}">
+            <img id="navbar-bell-icon" th:src="${cdnDomain + '/static/icon/layout/bell_off_dark.svg'}">
             <!-- 알림 버튼 클릭시 보여지는 알림 목록 -->
             <div class="navbar-alert-list-box" id="navbar-alert-list-box">
                 <!-- 하단 구문 안쓰고 axios로 가져옴 -->
