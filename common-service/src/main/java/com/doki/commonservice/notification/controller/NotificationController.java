@@ -32,12 +32,15 @@ public class NotificationController {
 
     /* 로그인 유저 대상 SSE 연결 */
     @GetMapping("/subscribe")
-    public SseEmitter subscribe(@CookieValue(value="accessToken", required=false) String accessToken) {
+    public SseEmitter subscribe(
+            @RequestParam(value = "lastEventId", required = false) Long lastEventId,
+            @CookieValue(value="accessToken", required=false) String accessToken
+    ) {
         // temp: API Gateway 임시 대체
         // 해당 API 호출 시점에서 role은 무조건 null이 아님
         Long code = Long.parseLong(jwtUtil.getClaims(accessToken).getSubject());
 
-        return notificationService.subscribe(code); // return sseEmitter
+        return notificationService.subscribe(code, lastEventId); // return sseEmitter
     }
 
     /* 알림 전체 조회 */

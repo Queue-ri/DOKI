@@ -47,7 +47,7 @@ public class NotificationService {
 
 
     /* 로그인 유저 대상 SSE 연결 */
-    public SseEmitter subscribe(Long memberCode) {
+    public SseEmitter subscribe(Long memberCode, Long lastEventId) {
         // 0. 요청자에게 할당된 key 없으면 초기화
         List<SseEmitter> emitters = NotificationController.sseEmitters.getOrDefault(memberCode, new ArrayList<>());
 
@@ -59,6 +59,22 @@ public class NotificationService {
             sseEmitter.send(SseEmitter.event().name("connect").data("connected"));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        // 2-1. lastEventId 이후부터 fallback 처리
+        if (lastEventId != null) {
+            List<Notification> unsentNotiList = nRepo.findAllByMember_MemberCodeAndNotificationIdGreaterThan(memberCode, lastEventId);
+            for (Notification noti : unsentNotiList) {
+                log.warn("SSE fallback");
+                try {
+                    sseEmitter.send(SseEmitter.event()
+                            .id(String.valueOf(noti.getNotificationId()))
+                            .name(noti.getNotiType().name())
+                            .data(noti.getData()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         // 3. 리스트에 저장
