@@ -137,7 +137,7 @@ public class NotificationService {
                 nRepo.flush();
 
                 // SSE 전송
-                sendSSE(memberCode, "RESERVE_RESULT", json);
+                sendSSE(memberCode, notification.getNotificationId(), "RESERVE_RESULT", json);
                 log.info("memberCode: {} | SSE RESERVE_RESULT sent: {}", memberCode, dto);
 
             } catch (Exception e) {
@@ -194,7 +194,7 @@ public class NotificationService {
                 nRepo.flush();
 
                 // SSE 전송
-                sendSSE(memberCode, "RESERVE_RESULT", json);
+                sendSSE(memberCode, notification.getNotificationId(), "RESERVE_RESULT", json);
                 log.info("memberCode: {} | SSE RESERVE_RESULT sent: {}", memberCode, dto);
 
             } catch (Exception e) {
@@ -253,7 +253,7 @@ public class NotificationService {
                 nRepo.flush();
 
                 // SSE 전송
-                sendSSE(memberCode, "RESERVE_REQUEST", json);
+                sendSSE(memberCode, notification.getNotificationId(), "RESERVE_REQUEST", json);
                 log.info("memberCode: {} | SSE RESERVE_REQUEST sent: {}", memberCode, dto);
 
             } catch (Exception e) {
@@ -267,14 +267,18 @@ public class NotificationService {
 
 
     /* memberCode에 대한 모든 SSE Emitter에 전송 (다중 탭 지원) */
-    private void sendSSE(Long memberCode, String eventName, String data) {
+    private void sendSSE(Long memberCode, Long notificationId, String eventName, String data) {
         List<SseEmitter> emitters = NotificationController.sseEmitters.get(memberCode);
         if (emitters != null) {
             Iterator<SseEmitter> iterator = emitters.iterator();
             while (iterator.hasNext()) {
                 SseEmitter emitter = iterator.next();
                 try {
-                    emitter.send(SseEmitter.event().name(eventName).data(data));
+                    emitter.send(SseEmitter.event()
+                            .id(String.valueOf(notificationId))
+                            .name(eventName)
+                            .data(data)
+                    );
                 } catch (IOException e) {
                     emitter.complete(); // 끊긴 emitter는 닫고
                     iterator.remove(); // 리스트에서 제거
