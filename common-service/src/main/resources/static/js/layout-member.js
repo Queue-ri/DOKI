@@ -15,24 +15,24 @@ function gotoRoot() {
 document.addEventListener("DOMContentLoaded", () => {
     /* 페이지 로딩시마다 알림 내역 가져오는 함수 */
     // 반드시 DOM 렌더링 후 작동해야 함 (안그러면 updateIndicator의 getElementById에서 null 터짐)
-    if (memberCode != null) { // 로그인 상태일때만 가져오기
-        axios.get(API_GATEWAY_HOST + "/noti/all"
-        ).then(function (response) {
-            console.log(response);
-            let notiList = response.data;
-            let notiCount = response.data.length;
-            if (notiCount > 0) {
-                let firstUnreadNoti = notiList[0]; // 가장 오래된 알림을 하나 읽어옴.
-                // 토스트 뷰 처리
-                const data = JSON.parse(firstUnreadNoti.data);
-                showAlarmToast(data);
-                deleteReadAlarm(firstUnreadNoti.notificationId);
-            }
-        }).catch(function (error) {
-            console.log(error);
-            alert("알림을 가져오는데 실패했습니다.");
-        });
-    }
+//    if (memberCode != null) { // 로그인 상태일때만 가져오기
+//        axios.get(API_GATEWAY_HOST + "/noti/all"
+//        ).then(function (response) {
+//            console.log(response);
+//            let notiList = response.data;
+//            let notiCount = response.data.length;
+//            if (notiCount > 0) {
+//                let firstUnreadNoti = notiList[0]; // 가장 오래된 알림을 하나 읽어옴.
+//                // 토스트 뷰 처리
+//                const data = JSON.parse(firstUnreadNoti.data);
+//                showAlarmToast(data);
+//                deleteReadAlarm(firstUnreadNoti.notificationId);
+//            }
+//        }).catch(function (error) {
+//            console.log(error);
+//            alert("알림을 가져오는데 실패했습니다.");
+//        });
+//    }
 
 
     /* navbar hide animation */
@@ -106,8 +106,13 @@ function signIn() {
         member_pw: memberPw
     }).then(function (response) {
         console.log(response);
+        const role = response.data.memberRole;
         overlay.style.visibility = "hidden";
-        location.reload();
+        if (role === "MEMBER") {
+            location.reload();
+        } else { // MANAGER, ADMIN
+            window.location.replace("/");
+        }
     }).catch(function (error) {
         console.log(error);
         if (error.status === 404) alert("아이디 또는 비밀번호가 틀렸습니다.");
@@ -140,6 +145,10 @@ function signOut() {
         axios.delete(`${API_GATEWAY_HOST}/v1/auth/sign-out`
         ).then(function (response) {
             console.log(response);
+
+            // 로그아웃 시 localStorage 초기화
+            localStorage.removeItem("lastEventId");
+
             window.location.replace("/");
         }).catch(function (error) {
             console.log(error);
@@ -217,7 +226,8 @@ function gotoMyReservationPage() {
     SSE 알림
 */
 if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상태에서만 SSE 수신
-    const eventSource = new EventSource(`${API_GATEWAY_HOST}/noti/subscribe`);
+    const lastEventId = localStorage.getItem("lastEventId") || "0";
+    const eventSource = new EventSource(API_GATEWAY_HOST + `/noti/subscribe?lastEventId=${lastEventId}`);
 
     // SSE 최초 연결시
     eventSource.onopen = function () {
@@ -231,6 +241,9 @@ if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상�
         // const message = event.data;
         console.log('Received message:', event.data); // logging
 
+        // lastEventId 저장
+        localStorage.setItem("lastEventId", event.lastEventId || event.id || "");
+
         // 현재의 URL에 따른 동적 뷰 처리
         if (window.location.href === `${window.location.origin}/member/reserve`) { // 1. 나의 예약 페이지면
             console.log('이벤트 수신 -> 나의 예약 테이블 업데이트');
@@ -240,6 +253,11 @@ if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상�
         // 토스트 뷰 처리
         const data = JSON.parse(event.data);
         showAlarmToast(data);
+    });
+
+    // 페이지 unload 시 SSE 연결 종료 (stall 방지)
+    window.addEventListener('beforeunload', () => {
+        if (eventSource) eventSource.close();
     });
 
     // 토스트 뷰 컨트롤

@@ -59,6 +59,7 @@ function signOut() {
 
             // 로그아웃 시 localStorage 초기화
             localStorage.removeItem("notiList");
+            localStorage.removeItem("lastEventId");
 
             window.location.replace("/");
         }).catch(function (error) {
@@ -122,7 +123,8 @@ function toggleAlertListBox() {
     SSE 알림
 */
 let notiCount = 0; // 최초 페이지 로딩 시 초기 알림 개수
-const eventSource = new EventSource(API_GATEWAY_HOST + "/noti/subscribe");
+const lastEventId = localStorage.getItem("lastEventId") || "";
+const eventSource = new EventSource(API_GATEWAY_HOST + `/noti/subscribe?lastEventId=${lastEventId}`);
 
 // SSE 최초 연결시
 eventSource.onopen = function() {
@@ -163,6 +165,9 @@ eventSource.addEventListener("RESERVE_REQUEST", (event) => {
     // 새로운 알림 추가 후 저장
     notiList.push(event.data);
     localStorage.setItem("notiList", JSON.stringify(notiList));
+
+    // lastEventId 저장
+    localStorage.setItem("lastEventId", event.lastEventId || event.id || "");
 
     // 알림 개수 증가
     notiCount += 1;
