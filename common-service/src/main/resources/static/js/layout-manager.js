@@ -16,7 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
         axios.get(API_GATEWAY_HOST + "/noti/all")
             .then(function (response) {
                 console.log(response);
-                notiList = response.data;
+                notiList = [];
+
+                response.data.forEach(noti => {
+                    // data만 push: API 스펙을 수정할지는 고민중임
+                    notiList.push(noti.data);
+                });
+
                 localStorage.setItem("notiList", JSON.stringify(notiList)); // cache
                 processNoti(notiList);
             })
@@ -39,7 +45,7 @@ function processNoti(notiList) {
     if (notiCount > 0) {
         updateIndicator();
         notiList.forEach(noti => {
-            addSingleElementToAlarmList(JSON.parse(noti.data));
+            addSingleElementToAlarmList(JSON.parse(noti));
         });
     }
 }
@@ -95,14 +101,14 @@ function toggleAlertListBox() {
             div.style.maxHeight = '350px'; // 알림 있으면 최대 350px 펼쳐짐
         }
         // 알림 리스트가 열렸을 때만 API 호출
-        axios.delete(API_GATEWAY_HOST + "/noti/all")
-            .then(function (response) {
-                console.log(response);
-            })
-            .catch(function (error) {
-                console.log(error);
-                alert("서버와의 통신에 실패했습니다.");
-            });
+//        axios.delete(API_GATEWAY_HOST + "/noti/all")
+//            .then(function (response) {
+//                console.log(response);
+//            })
+//            .catch(function (error) {
+//                console.log(error);
+//                alert("서버와의 통신에 실패했습니다.");
+//            });
     }
     else {
         // 닫힘
@@ -149,6 +155,14 @@ window.addEventListener('beforeunload', () => {
 eventSource.addEventListener("RESERVE_REQUEST", (event) => {
     // const message = event.data;
     console.log('Received message:', event.data); // logging
+
+    // localStorage에 저장된 notiList 불러오기
+    let cachedNotiList = localStorage.getItem("notiList");
+    let notiList = cachedNotiList ? JSON.parse(cachedNotiList) : [];
+
+    // 새로운 알림 추가 후 저장
+    notiList.push(event.data);
+    localStorage.setItem("notiList", JSON.stringify(notiList));
 
     // 알림 개수 증가
     notiCount += 1;
