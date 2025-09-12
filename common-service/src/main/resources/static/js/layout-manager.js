@@ -9,22 +9,40 @@ console.warn("requestUuid:", requestUuid);
 /* 페이지 로딩시마다 알림 내역 가져오는 함수 */
 // 반드시 DOM 렌더링 후 작동해야 함 (안그러면 updateIndicator의 getElementById에서 null 터짐)
 document.addEventListener("DOMContentLoaded", () => {
-    axios.get(API_GATEWAY_HOST + "/noti/all"
-    ).then(function (response) {
-        console.log(response);
-        notiList = response.data
-        notiCount = response.data.length;
-        if (notiCount > 0) {
-            updateIndicator();
-            notiList.forEach(noti => {
-                addSingleElementToAlarmList(JSON.parse(noti.data));
+    // localStorage에 notiList가 없으면 최초 로그인 후 첫 로딩으로 간주
+    const cachedNotiList = localStorage.getItem("notiList");
+    if (!cachedNotiList) {
+        console.log('GET /noti/all');
+        axios.get(API_GATEWAY_HOST + "/noti/all")
+            .then(function (response) {
+                console.log(response);
+                notiList = response.data;
+                localStorage.setItem("notiList", JSON.stringify(notiList)); // cache
+                processNoti(notiList);
+            })
+            .catch(function (error) {
+                console.log(error);
+                alert("알림을 가져오는데 실패했습니다.");
             });
-        }
-    }).catch(function (error) {
-        console.log(error);
-        alert("알림을 가져오는데 실패했습니다.");
-    });
+    }
+    else {
+        console.log('Access cache');
+        // localStorage에서 불러오기
+        notiList = JSON.parse(cachedNotiList);
+        processNoti(notiList);
+    }
 });
+
+function processNoti(notiList) {
+    notiCount = notiList.length;
+
+    if (notiCount > 0) {
+        updateIndicator();
+        notiList.forEach(noti => {
+            addSingleElementToAlarmList(JSON.parse(noti.data));
+        });
+    }
+}
 
 function signOut() {
     const ok = confirm("로그아웃 하시겠습니까?");
@@ -32,6 +50,10 @@ function signOut() {
         axios.delete(API_GATEWAY_HOST + "/v1/auth/sign-out"
         ).then(function (response) {
             console.log(response);
+
+            // 로그아웃 시 localStorage 초기화
+            localStorage.removeItem("notiList");
+
             window.location.replace("/");
         }).catch(function (error) {
             console.log(error);
@@ -100,6 +122,11 @@ const eventSource = new EventSource(API_GATEWAY_HOST + "/noti/subscribe");
 eventSource.onopen = function() {
     console.log('SSE 연결 성공');
 };
+
+// 페이지 unload 시 SSE 연결 종료 (stall 방지)
+window.addEventListener('beforeunload', () => {
+    if (eventSource) eventSource.close();
+});
 
 // SSE 이벤트 발생시마다 --> 'message' 타입에만 동작하므로, 프로젝트에서 사용하지 않음
 // eventSource.onmessage = (event) => {
