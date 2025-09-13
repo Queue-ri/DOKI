@@ -56,7 +56,18 @@ public class NotificationService {
 
         // 2. 연결
         try {
-            sseEmitter.send(SseEmitter.event().name("connect").data("connected"));
+            Long connectEventId;
+            // 최초 연결 시 해당 member의 마지막 notificationId 조회
+            if (lastEventId == null) {
+                connectEventId = nRepo.findLastNotificationIdByMemberCode(memberCode).orElse(0L);
+            }
+            else {
+                connectEventId = lastEventId; // 재연결 시 클라이언트가 준 lastEventId 그대로 사용
+            }
+            sseEmitter.send(SseEmitter.event()
+                    .id(String.valueOf(connectEventId))
+                    .name("connect")
+                    .data("connected"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,62 +117,59 @@ public class NotificationService {
         Reservation reservation = rRepo.findById(rid).get();
         Long memberCode = reservation.getMember().getMemberCode(); // 해당 예약의 이용자
 
-        if (NotificationController.sseEmitters.containsKey(memberCode)) {
-            try {
-                String resultStr = ""; // 예약 결과 알림 메시지 내용
-                if (resultStatus.equals("RESERVE_PENDING")) resultStr = "예약이 신청되었습니다.";
-                else if (resultStatus.equals("CONFIRMED")) {
-                    // RESERVE_PENDING -> CONFIRMED 는 예약 신청 승인(=예약 확정)이지만,
-                    // CANCEL_PENDING -> CONFIRMED 는 예약 취소 요청에 대한 거절임.
-                    resultStr = "예약이 확정되었습니다.";
-                }
-                else if (resultStatus.equals("REFUSED")) resultStr = "예약이 거절되었습니다.";
-                else if (resultStatus.equals("CANCELED")) resultStr = "예약이 취소되었습니다.";
-                else resultStr = "ERROR: 관리자에게 문의 바랍니다.";
-
-                // DB에 Notification 저장
-                Optional<Member> memberOpt = mRepo.findByMemberCode(memberCode);
-                if (memberOpt.isEmpty()) {
-                    log.error("요청 id의 회원 조회 결과 없음.");
-                    throw new CustomException(ErrorCode.USER_NOT_FOUND);
-                }
-
-                LocalDateTime now = LocalDateTime.now();
-                Notification notification = nRepo.save(
-                        Notification.builder()
-                                .member(memberOpt.get())
-                                .notiType(NotificationType.RESERVE_RESULT)
-                                .data("")
-                                .createdAt(LocalDateTime.now())
-                                .build()
-                );
-
-                // SSE data DTO 생성
-                ReserveResultNotiDto dto = ReserveResultNotiDto.builder()
-                        .notificationId(notification.getNotificationId())
-                        .storeId(reservation.getStore().getStoreId())
-                        .storeName(reservation.getStore().getStoreName())
-                        .messageCode(resultStatus)
-                        .message(resultStr)
-                        .createdAt(now)
-                        .build();
-
-                // data 직렬화 및 Notification data 업데이트
-                String json = objectMapper.writeValueAsString(dto);
-                notification.setData(json);
-                nRepo.save(notification);
-                nRepo.flush();
-
-                // SSE 전송
-                sendSSE(memberCode, notification.getNotificationId(), "RESERVE_RESULT", json);
-                log.info("memberCode: {} | SSE RESERVE_RESULT sent: {}", memberCode, dto);
-
-            } catch (Exception e) {
-                log.error("SSE 알림 전송 실패: [{}]", e.getClass().getSimpleName());
-                log.error("SSE 알림 전송 실패: {}", e.getMessage());
-                NotificationController.sseEmitters.remove(memberCode);
-                throw new CustomException(ErrorCode.SOMETHING_WENT_WRONG);
+        try {
+            String resultStr = ""; // 예약 결과 알림 메시지 내용
+            if (resultStatus.equals("RESERVE_PENDING")) resultStr = "예약이 신청되었습니다.";
+            else if (resultStatus.equals("CONFIRMED")) {
+                // RESERVE_PENDING -> CONFIRMED 는 예약 신청 승인(=예약 확정)이지만,
+                // CANCEL_PENDING -> CONFIRMED 는 예약 취소 요청에 대한 거절임.
+                resultStr = "예약이 확정되었습니다.";
             }
+            else if (resultStatus.equals("REFUSED")) resultStr = "예약이 거절되었습니다.";
+            else if (resultStatus.equals("CANCELED")) resultStr = "예약이 취소되었습니다.";
+            else resultStr = "ERROR: 관리자에게 문의 바랍니다.";
+
+            // DB에 Notification 저장
+            Optional<Member> memberOpt = mRepo.findByMemberCode(memberCode);
+            if (memberOpt.isEmpty()) {
+                log.error("요청 id의 회원 조회 결과 없음.");
+                throw new CustomException(ErrorCode.USER_NOT_FOUND);
+            }
+
+            LocalDateTime now = LocalDateTime.now();
+            Notification notification = nRepo.save(
+                    Notification.builder()
+                            .member(memberOpt.get())
+                            .notiType(NotificationType.RESERVE_RESULT)
+                            .data("")
+                            .createdAt(LocalDateTime.now())
+                            .build()
+            );
+
+            // SSE data DTO 생성
+            ReserveResultNotiDto dto = ReserveResultNotiDto.builder()
+                    .notificationId(notification.getNotificationId())
+                    .storeId(reservation.getStore().getStoreId())
+                    .storeName(reservation.getStore().getStoreName())
+                    .messageCode(resultStatus)
+                    .message(resultStr)
+                    .createdAt(now)
+                    .build();
+
+            // data 직렬화 및 Notification data 업데이트
+            String json = objectMapper.writeValueAsString(dto);
+            notification.setData(json);
+            nRepo.save(notification);
+            nRepo.flush();
+
+            // SSE 전송
+            sendSSE(memberCode, notification.getNotificationId(), "RESERVE_RESULT", json);
+
+        } catch (Exception e) {
+            log.error("SSE 알림 전송 실패: [{}]", e.getClass().getSimpleName());
+            log.error("SSE 알림 전송 실패: {}", e.getMessage());
+            NotificationController.sseEmitters.remove(memberCode);
+            throw new CustomException(ErrorCode.SOMETHING_WENT_WRONG);
         }
     }
 
@@ -173,52 +181,49 @@ public class NotificationService {
         // 추후에 에러핸들링 필요
         Store store = sRepo.findById(sid).get();
 
-        if (NotificationController.sseEmitters.containsKey(memberCode)) {
-            try {
-                // DB에 Notification 저장
-                Optional<Member> memberOpt = mRepo.findByMemberCode(memberCode);
-                if (memberOpt.isEmpty()) {
-                    log.error("요청 id의 회원 조회 결과 없음.");
-                    throw new CustomException(ErrorCode.USER_NOT_FOUND);
-                }
-
-                LocalDateTime now = LocalDateTime.now();
-                Notification notification = nRepo.save(
-                        Notification.builder()
-                                .member(memberOpt.get())
-                                .notiType(NotificationType.RESERVE_RESULT)
-                                .data("")
-                                .createdAt(now)
-                                .build()
-                );
-
-                // SSE data DTO 생성
-                String storeName = store.getStoreName(); // 이용자가 예약 관련 요청을 보낸 팝업스토어명
-                ReserveResultNotiDto dto = ReserveResultNotiDto.builder()
-                        .notificationId(notification.getNotificationId())
-                        .storeId(sid)
-                        .storeName(storeName)
-                        .messageCode("FAILED")
-                        .message("예약 정원이 마감되었습니다.")
-                        .createdAt(now)
-                        .build();
-
-                // data 직렬화 및 Notification data 업데이트
-                String json = objectMapper.writeValueAsString(dto);
-                notification.setData(json);
-                nRepo.save(notification);
-                nRepo.flush();
-
-                // SSE 전송
-                sendSSE(memberCode, notification.getNotificationId(), "RESERVE_RESULT", json);
-                log.info("memberCode: {} | SSE RESERVE_RESULT sent: {}", memberCode, dto);
-
-            } catch (Exception e) {
-                log.error("SSE 알림 전송 실패: [{}]", e.getClass().getSimpleName());
-                log.error("SSE 알림 전송 실패: {}", e.getMessage());
-                NotificationController.sseEmitters.remove(memberCode);
-                throw new CustomException(ErrorCode.SOMETHING_WENT_WRONG);
+        try {
+            // DB에 Notification 저장
+            Optional<Member> memberOpt = mRepo.findByMemberCode(memberCode);
+            if (memberOpt.isEmpty()) {
+                log.error("요청 id의 회원 조회 결과 없음.");
+                throw new CustomException(ErrorCode.USER_NOT_FOUND);
             }
+
+            LocalDateTime now = LocalDateTime.now();
+            Notification notification = nRepo.save(
+                    Notification.builder()
+                            .member(memberOpt.get())
+                            .notiType(NotificationType.RESERVE_RESULT)
+                            .data("")
+                            .createdAt(now)
+                            .build()
+            );
+
+            // SSE data DTO 생성
+            String storeName = store.getStoreName(); // 이용자가 예약 관련 요청을 보낸 팝업스토어명
+            ReserveResultNotiDto dto = ReserveResultNotiDto.builder()
+                    .notificationId(notification.getNotificationId())
+                    .storeId(sid)
+                    .storeName(storeName)
+                    .messageCode("FAILED")
+                    .message("예약 정원이 마감되었습니다.")
+                    .createdAt(now)
+                    .build();
+
+            // data 직렬화 및 Notification data 업데이트
+            String json = objectMapper.writeValueAsString(dto);
+            notification.setData(json);
+            nRepo.save(notification);
+            nRepo.flush();
+
+            // SSE 전송
+            sendSSE(memberCode, notification.getNotificationId(), "RESERVE_RESULT", json);
+
+        } catch (Exception e) {
+            log.error("SSE 알림 전송 실패: [{}]", e.getClass().getSimpleName());
+            log.error("SSE 알림 전송 실패: {}", e.getMessage());
+            NotificationController.sseEmitters.remove(memberCode);
+            throw new CustomException(ErrorCode.SOMETHING_WENT_WRONG);
         }
     }
 
@@ -226,80 +231,83 @@ public class NotificationService {
     /* [INTERNAL] 예약 요청 알림 - 이용자 to 운영자 */
     @Transactional
     public void notifyReserveRequestToManager(Long memberCode, Reservation reservation, String requestType) {
-        if (NotificationController.sseEmitters.containsKey(memberCode)) {
-            try {
-                String requestTypeStr = "";
-                if (requestType.equals("CONFIRM_REQUEST")) requestTypeStr = "새로운 예약 신청이 있습니다.";
-                else if (requestType.equals("CANCEL_REQUEST")) requestTypeStr = "새로운 예약 취소 요청이 있습니다.";
-                else if (requestType.equals("AUTO_CONFIRMED")) requestTypeStr = "예약이 자동 승인되었습니다."; // V2는 자동 예약 확정
-                else requestTypeStr = "ERROR: 관리자에게 문의 바랍니다.";
+        try {
+            String requestTypeStr = "";
+            if (requestType.equals("CONFIRM_REQUEST")) requestTypeStr = "새로운 예약 신청이 있습니다.";
+            else if (requestType.equals("CANCEL_REQUEST")) requestTypeStr = "새로운 예약 취소 요청이 있습니다.";
+            else if (requestType.equals("AUTO_CONFIRMED")) requestTypeStr = "예약이 자동 승인되었습니다."; // V2는 자동 예약 확정
+            else requestTypeStr = "ERROR: 관리자에게 문의 바랍니다.";
 
-                // DB에 Notification 저장
-                Optional<Member> memberOpt = mRepo.findByMemberCode(memberCode);
-                if (memberOpt.isEmpty()) {
-                    log.error("요청 id의 회원 조회 결과 없음.");
-                    throw new CustomException(ErrorCode.USER_NOT_FOUND);
-                }
-
-                LocalDateTime now = LocalDateTime.now();
-                Notification notification = nRepo.save(
-                        Notification.builder()
-                                .member(memberOpt.get())
-                                .notiType(NotificationType.RESERVE_REQUEST)
-                                .data("")
-                                .createdAt(now)
-                                .build()
-                );
-
-                // SSE data DTO 생성
-                String storeName = reservation.getStore().getStoreName(); // 이용자가 예약 관련 요청을 보낸 팝업스토어명
-                ReserveRequestNotiDto dto = ReserveRequestNotiDto.builder()
-                        .notificationId(notification.getNotificationId())
-                        .reservationId(reservation.getReservationId())
-                        .reservedDateTime(reservation.getReservedDateTime())
-                        .messageCode(requestType)
-                        .message(requestTypeStr)
-                        .createdAt(now)
-                        .build();
-
-                // data 직렬화 및 Notification data 업데이트
-                String json = objectMapper.writeValueAsString(dto);
-                notification.setData(json);
-                nRepo.save(notification);
-                nRepo.flush();
-
-                // SSE 전송
-                sendSSE(memberCode, notification.getNotificationId(), "RESERVE_REQUEST", json);
-                log.info("memberCode: {} | SSE RESERVE_REQUEST sent: {}", memberCode, dto);
-
-            } catch (Exception e) {
-                log.error("SSE 알림 전송 실패: [{}]", e.getClass().getSimpleName());
-                log.error("SSE 알림 전송 실패: {}", e.getMessage());
-                NotificationController.sseEmitters.remove(memberCode);
-                throw new CustomException(ErrorCode.SOMETHING_WENT_WRONG);
+            // DB에 Notification 저장
+            Optional<Member> memberOpt = mRepo.findByMemberCode(memberCode);
+            if (memberOpt.isEmpty()) {
+                log.error("요청 id의 회원 조회 결과 없음.");
+                throw new CustomException(ErrorCode.USER_NOT_FOUND);
             }
+
+            LocalDateTime now = LocalDateTime.now();
+            Notification notification = nRepo.save(
+                    Notification.builder()
+                            .member(memberOpt.get())
+                            .notiType(NotificationType.RESERVE_REQUEST)
+                            .data("")
+                            .createdAt(now)
+                            .build()
+            );
+
+            // SSE data DTO 생성
+            String storeName = reservation.getStore().getStoreName(); // 이용자가 예약 관련 요청을 보낸 팝업스토어명
+            ReserveRequestNotiDto dto = ReserveRequestNotiDto.builder()
+                    .notificationId(notification.getNotificationId())
+                    .reservationId(reservation.getReservationId())
+                    .reservedDateTime(reservation.getReservedDateTime())
+                    .messageCode(requestType)
+                    .message(requestTypeStr)
+                    .createdAt(now)
+                    .build();
+
+            // data 직렬화 및 Notification data 업데이트
+            String json = objectMapper.writeValueAsString(dto);
+            notification.setData(json);
+            nRepo.save(notification);
+            nRepo.flush();
+
+            // SSE 전송
+            sendSSE(memberCode, notification.getNotificationId(), "RESERVE_REQUEST", json);
+
+        } catch (Exception e) {
+            log.error("SSE 알림 전송 실패: [{}]", e.getClass().getSimpleName());
+            log.error("SSE 알림 전송 실패: {}", e.getMessage());
+            NotificationController.sseEmitters.remove(memberCode);
+            throw new CustomException(ErrorCode.SOMETHING_WENT_WRONG);
         }
     }
 
 
     /* memberCode에 대한 모든 SSE Emitter에 전송 (다중 탭 지원) */
     private void sendSSE(Long memberCode, Long notificationId, String eventName, String data) {
-        List<SseEmitter> emitters = NotificationController.sseEmitters.get(memberCode);
-        if (emitters != null) {
-            Iterator<SseEmitter> iterator = emitters.iterator();
-            while (iterator.hasNext()) {
-                SseEmitter emitter = iterator.next();
-                try {
-                    emitter.send(SseEmitter.event()
-                            .id(String.valueOf(notificationId))
-                            .name(eventName)
-                            .data(data)
-                    );
-                } catch (IOException e) {
-                    emitter.complete(); // 끊긴 emitter는 닫고
-                    iterator.remove(); // 리스트에서 제거
+        // 구독중인 SSE Emitter가 존재할때만 전송
+        if (NotificationController.sseEmitters.containsKey(memberCode)) {
+
+            List<SseEmitter> emitters = NotificationController.sseEmitters.get(memberCode);
+            if (emitters != null) {
+                Iterator<SseEmitter> iterator = emitters.iterator();
+                while (iterator.hasNext()) {
+                    SseEmitter emitter = iterator.next();
+                    try {
+                        emitter.send(SseEmitter.event()
+                                .id(String.valueOf(notificationId))
+                                .name(eventName)
+                                .data(data)
+                        );
+                    } catch (IOException e) {
+                        emitter.complete(); // 끊긴 emitter는 닫고
+                        iterator.remove(); // 리스트에서 제거
+                    }
                 }
             }
+
+            log.info("memberCode: {} | SSE {} sent: {}", memberCode, eventName, data);
         }
     }
 
