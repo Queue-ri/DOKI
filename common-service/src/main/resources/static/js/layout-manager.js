@@ -154,6 +154,11 @@ window.addEventListener('beforeunload', () => {
 
 // SSE 이벤트 발생시마다 --> custom type 용
 // 운영자는 RESERVE_REQUEST type에 대한 이벤트만 수신함.
+eventSource.addEventListener("connect", (event) => {
+    // lastEventId 초기화
+    localStorage.setItem("lastEventId", event.lastEventId);
+});
+
 eventSource.addEventListener("RESERVE_REQUEST", (event) => {
     // const message = event.data;
     console.log('Received message:', event.data); // logging
@@ -166,8 +171,8 @@ eventSource.addEventListener("RESERVE_REQUEST", (event) => {
     notiList.push(event.data);
     localStorage.setItem("notiList", JSON.stringify(notiList));
 
-    // lastEventId 저장
-    localStorage.setItem("lastEventId", event.lastEventId || event.id || "");
+    // lastEventId 업데이트
+    localStorage.setItem("lastEventId", event.lastEventId);
 
     // 알림 개수 증가
     notiCount += 1;

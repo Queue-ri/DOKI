@@ -226,7 +226,7 @@ function gotoMyReservationPage() {
     SSE 알림
 */
 if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상태에서만 SSE 수신
-    const lastEventId = localStorage.getItem("lastEventId") || "0";
+    const lastEventId = localStorage.getItem("lastEventId") || "";
     const eventSource = new EventSource(API_GATEWAY_HOST + `/noti/subscribe?lastEventId=${lastEventId}`);
 
     // SSE 최초 연결시
@@ -237,12 +237,17 @@ if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상�
 
     // SSE 이벤트 발생시마다 --> custom type 용
     // 이용자는 RESERVE_RESULT type에 대한 이벤트만 수신함.
+    eventSource.addEventListener("connect", (event) => {
+        // lastEventId 초기화
+        localStorage.setItem("lastEventId", event.lastEventId);
+    });
+
     eventSource.addEventListener("RESERVE_RESULT", (event) => {
         // const message = event.data;
         console.log('Received message:', event.data); // logging
 
-        // lastEventId 저장
-        localStorage.setItem("lastEventId", event.lastEventId || event.id || "");
+        // lastEventId 업데이트
+        localStorage.setItem("lastEventId", event.lastEventId);
 
         // 현재의 URL에 따른 동적 뷰 처리
         if (window.location.href === `${window.location.origin}/member/reserve`) { // 1. 나의 예약 페이지면
