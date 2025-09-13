@@ -12,13 +12,18 @@ import java.util.Optional;
  */
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findAllByMember_MemberCode(Long memberCode);
-    void deleteByNotificationIdAndMember_MemberCode(Long notificationId, Long memberCode);
-    void deleteAllByMember_MemberCode(Long memberCode);
+    @Query("SELECT n FROM Notification n " +
+            "WHERE n.member.memberCode = :memberCode " +
+            "AND n.status <> NotificationStatus.DELETED " +
+            "ORDER BY n.notificationId DESC")
+    List<Notification> findAllActiveByMemberCode(@Param("memberCode") Long memberCode);
+
     List<Notification> findAllByMember_MemberCodeAndNotificationIdGreaterThan(Long memberCode, Long lastEventId);
 
     @Query("SELECT MAX(n.notificationId) " +
             "FROM Notification n " +
             "WHERE n.member.memberCode = :memberCode")
     Optional<Long> findLastNotificationIdByMemberCode(@Param("memberCode") Long memberCode);
+
+    Optional<Notification> findByNotificationIdAndMember_MemberCode(Long notificationId, Long memberCode);
 }

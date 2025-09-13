@@ -7,6 +7,7 @@ import com.doki.commonservice.member.model.MemberRepository;
 import com.doki.commonservice.notification.controller.NotificationController;
 import com.doki.commonservice.notification.domain.Notification;
 import com.doki.commonservice.notification.domain.NotificationRepository;
+import com.doki.commonservice.notification.domain.NotificationStatus;
 import com.doki.commonservice.notification.domain.NotificationType;
 import com.doki.commonservice.notification.dto.ReserveRequestNotiDto;
 import com.doki.commonservice.notification.dto.ReserveResultNotiDto;
@@ -14,6 +15,7 @@ import com.doki.commonservice.reserve.model.Reservation;
 import com.doki.commonservice.reserve.model.ReservationRepository;
 import com.doki.commonservice.store.model.Store;
 import com.doki.commonservice.store.model.StoreRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -101,9 +103,9 @@ public class NotificationService {
     }
 
 
-    /* 특정 member의 전체 알림 조회 - 서비스 정책 상 조회된다는 것 == 아직 읽지 않음 */
+    /* 특정 member의 전체 알림 조회: 삭제 처리된 알림은 제외 */
     public List<Notification> getAll(Long memberCode) {
-        return nRepo.findAllByMember_MemberCode(memberCode);
+        return nRepo.findAllActiveByMemberCode(memberCode);
     }
 
 
@@ -153,6 +155,7 @@ public class NotificationService {
                     .storeName(reservation.getStore().getStoreName())
                     .messageCode(resultStatus)
                     .message(resultStr)
+                    .status(notification.getStatus().toString())
                     .createdAt(now)
                     .build();
 
@@ -207,6 +210,7 @@ public class NotificationService {
                     .storeName(storeName)
                     .messageCode("FAILED")
                     .message("예약 정원이 마감되었습니다.")
+                    .status(notification.getStatus().toString())
                     .createdAt(now)
                     .build();
 
@@ -263,6 +267,7 @@ public class NotificationService {
                     .reservedDateTime(reservation.getReservedDateTime())
                     .messageCode(requestType)
                     .message(requestTypeStr)
+                    .status(notification.getStatus().toString())
                     .createdAt(now)
                     .build();
 
@@ -311,23 +316,61 @@ public class NotificationService {
         }
     }
 
-
-    /* 특정 알림 삭제 - 서비스 정책 상 member가 읽었으면 해당 알림은 삭제 */
+    /* 특정 알림 읽음 처리 */
     @Transactional
-    public ResponseEntity<?> deleteNotification(Long nid, Long memberCode) {
-        log.info("memberCode: {}", memberCode);
-        nRepo.deleteByNotificationIdAndMember_MemberCode(nid, memberCode);
+    public ResponseEntity<?> markAsRead(Long nid, Long memberCode) {
+        log.debug("memberCode: {}", memberCode);
+        Optional<Notification> notiOpt = nRepo.findByNotificationIdAndMember_MemberCode(nid, memberCode);
+
+        if (notiOpt.isEmpty()) {
+            log.error("요청 id의 알림 읽음 처리 불가");
+            throw new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+
+        Notification notification = notiOpt.get();
+        notification.setStatus(NotificationStatus.READ);
+        setNotiDataStatus(notification, NotificationStatus.READ.toString());
 
         return ResponseEntity.ok().build();
     }
 
-
-    /* 요청 member의 전체 알림 삭제 */
+    /* 특정 알림 삭제 처리 */
+    // 서비스 정책에 따라 마킹만 하고 실제 삭제는 하지 않음
     @Transactional
-    public ResponseEntity<?> deleteAllNotifications(Long memberCode) {
-        log.info("memberCode: {}", memberCode);
-        nRepo.deleteAllByMember_MemberCode(memberCode);
+    public ResponseEntity<?> markAsDeleted(Long nid, Long memberCode) {
+        log.debug("memberCode: {}", memberCode);
+        Optional<Notification> notiOpt = nRepo.findByNotificationIdAndMember_MemberCode(nid, memberCode);
+
+        if (notiOpt.isEmpty()) {
+            log.error("요청 id의 알림 삭제 처리 불가");
+            throw new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+
+        Notification notification = notiOpt.get();
+        notification.setStatus(NotificationStatus.DELETED);
+        setNotiDataStatus(notification, NotificationStatus.DELETED.toString());
 
         return ResponseEntity.ok().build();
+    }
+
+    // notification data의 status를 notification status와 동기화하는 함수
+    // notification type마다 매칭되는 dto로 data를 파싱함
+    private void setNotiDataStatus(Notification notification, String newStatus) {
+        try {
+            switch (notification.getNotiType().toString()) {
+                case "RESERVE_REQUEST" -> {
+                    ReserveRequestNotiDto dto = objectMapper.readValue(notification.getData(), ReserveRequestNotiDto.class);
+                    dto.setStatus(newStatus);
+                    notification.setData(objectMapper.writeValueAsString(dto));
+                }
+                case "RESERVE_RESULT" -> {
+                    ReserveResultNotiDto dto = objectMapper.readValue(notification.getData(), ReserveResultNotiDto.class);
+                    dto.setStatus(newStatus);
+                    notification.setData(objectMapper.writeValueAsString(dto));
+                }
+            }
+        } catch (Exception e) {
+            log.error("알림 data 동기화 실패");
+        }
     }
 }
