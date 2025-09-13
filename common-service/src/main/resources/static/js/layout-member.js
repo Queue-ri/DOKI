@@ -74,10 +74,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// id가 nid인 알림 삭제
-async function deleteReadAlarm(nid) {
-    await deleteRequest(`${API_GATEWAY_HOST}/noti?id=${nid}`);
-    console.log(`${nid}번 알림 삭제 완료`);
+// id가 nid인 알림 읽음 처리
+function markAsRead(nid) {
+    axios.patch(API_GATEWAY_HOST + `/noti/read?id=${nid}`)
+    .then(function (response) {
+        console.log(`${nid}번 알림 READ 처리 완료`);
+    })
+    .catch(function (error) {
+        console.log(error);
+        alert("서버와의 통신에 실패했습니다.");
+    });
+}
+
+// id가 nid인 알림 삭제 처리
+function markAsDeleted(nid) {
+    axios.delete(API_GATEWAY_HOST + `/noti?id=${nid}`)
+    .then(function (response) {
+        console.log(`${nid}번 알림 DELETED 처리 완료`);
+    })
+    .catch(function (error) {
+        console.log(error);
+        alert("서버와의 통신에 실패했습니다.");
+    });
 }
 
 
@@ -226,44 +244,55 @@ function gotoMyReservationPage() {
     SSE 알림
 */
 if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상태에서만 SSE 수신
-    const lastEventId = localStorage.getItem("lastEventId") || "";
-    const eventSource = new EventSource(API_GATEWAY_HOST + `/noti/subscribe?lastEventId=${lastEventId}`);
+    function connectSSE() {
+        const lastEventId = localStorage.getItem("lastEventId") || "";
+        let eventSource = new EventSource(API_GATEWAY_HOST + `/noti/subscribe?lastEventId=${lastEventId}`);
 
-    // SSE 최초 연결시
-    eventSource.onopen = function () {
-        console.log('SSE 연결 성공');
-        console.log('memberCode:', memberCode);
-    };
+        // SSE 최초 연결시
+        eventSource.onopen = function () {
+            console.log('SSE 연결 성공');
+            console.log('memberCode:', memberCode);
+        };
 
-    // SSE 이벤트 발생시마다 --> custom type 용
-    // 이용자는 RESERVE_RESULT type에 대한 이벤트만 수신함.
-    eventSource.addEventListener("connect", (event) => {
-        // lastEventId 초기화
-        localStorage.setItem("lastEventId", event.lastEventId);
-    });
+        // SSE 이벤트 발생시마다 --> custom type 용
+        // 이용자는 RESERVE_RESULT type에 대한 이벤트만 수신함.
+        eventSource.addEventListener("connect", (event) => {
+            // lastEventId 초기화
+            localStorage.setItem("lastEventId", event.lastEventId);
+        });
 
-    eventSource.addEventListener("RESERVE_RESULT", (event) => {
-        // const message = event.data;
-        console.log('Received message:', event.data); // logging
+        eventSource.addEventListener("RESERVE_RESULT", (event) => {
+            // const message = event.data;
+            console.log('Received message:', event.data); // logging
 
-        // lastEventId 업데이트
-        localStorage.setItem("lastEventId", event.lastEventId);
+            // lastEventId 업데이트
+            localStorage.setItem("lastEventId", event.lastEventId);
 
-        // 현재의 URL에 따른 동적 뷰 처리
-        if (window.location.href === `${window.location.origin}/member/reserve`) { // 1. 나의 예약 페이지면
-            console.log('이벤트 수신 -> 나의 예약 테이블 업데이트');
-            updateView();
-        }
+            // 현재의 URL에 따른 동적 뷰 처리
+            if (window.location.href === `${window.location.origin}/member/reserve`) { // 1. 나의 예약 페이지면
+                console.log('이벤트 수신 -> 나의 예약 테이블 업데이트');
+                updateView();
+            }
 
-        // 토스트 뷰 처리
-        const data = JSON.parse(event.data);
-        showAlarmToast(data);
-    });
+            // 토스트 뷰 처리
+            const data = JSON.parse(event.data);
+            showAlarmToast(data);
+        });
 
-    // 페이지 unload 시 SSE 연결 종료 (stall 방지)
-    window.addEventListener('beforeunload', () => {
-        if (eventSource) eventSource.close();
-    });
+        // SSE 오류 처리 및 재연결
+        eventSource.onerror = () => {
+            console.log('SSE 재연결');
+            eventSource.close();
+            setTimeout(connectSSE, 1000); // 1초 후 재연결
+        };
+
+        // 페이지 unload 시 SSE 연결 종료 (stall 방지)
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) eventSource.close();
+        });
+    }
+
+    connectSSE(); // 최초 연결 호출
 
     // 토스트 뷰 컨트롤
     function showAlarmToast(data) {
@@ -318,6 +347,7 @@ if (memberRole === "MEMBER" && memberCode != null) { // 이용자 로그인 상�
         createdAtDiv.replaceWith(newCreatedAtDiv);
 
         // 토스트 박스 보여주기
+        markAsRead(data.notificationId);
         notiToastBoxDiv.classList.add("active");
 
         // 5초 후 토스트 박스 숨기기

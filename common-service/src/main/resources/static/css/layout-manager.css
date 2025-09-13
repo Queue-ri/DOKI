@@ -131,6 +131,10 @@ body {
     color: #131313;
     margin-bottom: 16px;
 }
+.navbar-alert-element.read .navbar-alert-element-title,
+.navbar-alert-element.read .navbar-alert-element-message {
+    color: #A09F9F;
+}
 .navbar-alert-element-createdAt {
     font-family: "Pretendard", sans-serif;
     font-weight: 300;
