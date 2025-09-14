@@ -28,16 +28,19 @@ public class NotificationController {
     */
     private final JwtUtil jwtUtil;
     private final NotificationService notificationService;
-    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+    public static Map<Long, List<SseEmitter>> sseEmitters = new ConcurrentHashMap<>();
 
     /* 로그인 유저 대상 SSE 연결 */
     @GetMapping("/subscribe")
-    public SseEmitter subscribe(@CookieValue(value="accessToken", required=false) String accessToken) {
+    public SseEmitter subscribe(
+            @RequestParam(value = "lastEventId", required = false) Long lastEventId,
+            @CookieValue(value="accessToken", required=false) String accessToken
+    ) {
         // temp: API Gateway 임시 대체
         // 해당 API 호출 시점에서 role은 무조건 null이 아님
         Long code = Long.parseLong(jwtUtil.getClaims(accessToken).getSubject());
 
-        return notificationService.subscribe(code); // return sseEmitter
+        return notificationService.subscribe(code, lastEventId); // return sseEmitter
     }
 
     /* 알림 전체 조회 */
@@ -50,7 +53,21 @@ public class NotificationController {
         return notificationService.getAll(code);
     }
 
-    /* 특정 알림 삭제 */
+    /* 특정 알림 읽음 처리 */
+    @PatchMapping("/read")
+    public ResponseEntity<?> markNotificationAsRead(
+            @RequestParam("id") Long nid,
+            @CookieValue(value="accessToken", required=false) String accessToken
+    ) throws IOException {
+        // temp: API Gateway 임시 대체
+        // 해당 API 호출 시점에서 role은 무조건 null이 아님
+        Long code = Long.parseLong(jwtUtil.getClaims(accessToken).getSubject());
+
+        return notificationService.markAsRead(nid, code);
+    }
+
+    /* 특정 알림 삭제 처리 */
+    // 서비스 정책에 따라 마킹만 하고 실제 삭제는 하지 않음
     @DeleteMapping
     public ResponseEntity<?> deleteNotification(
             @RequestParam("id") Long nid,
@@ -60,20 +77,6 @@ public class NotificationController {
         // 해당 API 호출 시점에서 role은 무조건 null이 아님
         Long code = Long.parseLong(jwtUtil.getClaims(accessToken).getSubject());
 
-        return notificationService.deleteNotification(nid, code);
-    }
-
-    /* 요청 member의 전체 알림 삭제 */
-    // member는 MANAGER 또는 ADMIN
-    // 알림창 toggle해서 알림 확인하면 전체 알림을 읽음 처리
-    @DeleteMapping("/all")
-    public ResponseEntity<?> deleteAllNotifications(
-            @CookieValue(value="accessToken", required=false) String accessToken
-    ) throws IOException {
-        // temp: API Gateway 임시 대체
-        // 해당 API 호출 시점에서 role은 무조건 null이 아님
-        Long code = Long.parseLong(jwtUtil.getClaims(accessToken).getSubject());
-
-        return notificationService.deleteAllNotifications(code);
+        return notificationService.markAsDeleted(nid, code);
     }
 }

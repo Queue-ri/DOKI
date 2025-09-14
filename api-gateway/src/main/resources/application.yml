@@ -21,6 +21,7 @@ spring:
             - GET
             - POST
             - DELETE
+            - PATCH
             - OPTIONS
     gateway:
       routes:

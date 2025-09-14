@@ -87,7 +87,7 @@ jobs:
     needs: docker-push
     env:
       DOCKER_REPO: qriosity/doki
-      GHCR_REPO: Queue-ri/doki
+      GHCR_REPO: queue-ri/doki
     steps:
     - name: Get Docker Images
       run: |

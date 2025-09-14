@@ -18,13 +18,17 @@ body {
     width: 100%;
     height: 80px;
     background-color: #FFFFFF;
-    border-bottom: 1px solid #E1E0E1;
+    box-shadow: inset 0 -1px 0 #EEEEEE;
 
     /* to make navbar float */
     position: fixed;
     top: 0;
 
     z-index: 999;
+    transition: transform 0.4s ease-out;
+}
+.navbar.hide {
+    transform: translateY(-100%);
 }
 .navbar-wrapper {
     display: flex;
@@ -126,45 +130,73 @@ body {
 .noti-toast-box {
     position: fixed;
     display: flex;
-    flex-direction: column;
-    padding: 24px 42px;
+    flex-direction: row;
+    min-width: 556px;
+    border: 1px solid #232323;
     /*bottom: 48px;*/
-    bottom: -100px;
+    bottom: -180px;
 
     /* x-axis: align center */
     left: 50%;
     transform: translateX(-50%);
 
     background-color: #FEFEFE;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;
+    overflow: hidden;
 
     transition: all 0.5s cubic-bezier(0.68, -0.55, 0.25, 1.35);
 }
 .noti-toast-box.active {
-    /* bottom: -100px로 내려놓은거 다시 올리고 48px만큼 추가로 올린 위치 */
-    transform: translate(-50%, calc(-100px - 48px));
+    /* bottom: -200px로 내려놓은거 다시 올리고 48px만큼 추가로 올린 위치 */
+    transform: translate(-50%, calc(-180px - 48px));
 }
-.noti-toast-data {
+.noti-toast-icon-box {
+    position: relative;
+    width: 102px;
+    height: inherit;
+    background-color: rgba(35, 35, 35, 0.9);
+}
+.noti-toast-icon-box img {
+    position: absolute;
+    top: 26px;
+    left: 32px;
+    color: #FFFFFF;
+}
+.noti-toast-data-box {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 26px 48px;
+}
+.noti-toast-data-title {
     font-family: "Pretendard", sans-serif;
-    font-weight: 500;
-    font-size: 18px;
+    font-weight: 600;
+    font-size: 23px;
     color: #131313;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
-.noti-toast-datetime {
+.noti-toast-data-message {
+    font-family: "Pretendard", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: #131313;
+    margin-bottom: 26px;
+}
+.noti-toast-data-createdAt {
     font-family: "Pretendard", sans-serif;
     font-weight: 300;
-    font-size: 14px;
-    color: #C2C2C2;
+    font-size: 16px;
+    color: #B4B4B4;
+    margin: auto auto 0 0;
 }
 
 
 /* footer */
 .footer {
     width: 100%;
-    height: 311px;
-    background-color: #232323;
+    height: inherit;
+    background-color: #000000;
 }
 .footer-wrapper {
     display: flex;
@@ -177,13 +209,14 @@ body {
 .footer-top {
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid rgba(202, 200, 199, 0.1);
-    margin-bottom: 20px;
+    border-bottom: 1px solid #ACACAC;
+    margin-bottom: 28px;
 }
 
 .top-top {
     display: flex;
     flex-direction: row;
+    margin-bottom: 96px;
 }
 
 .footer-logo {
@@ -192,40 +225,71 @@ body {
     font-size: 32px;
     letter-spacing: 3.8px;
     color: #FFFFFF;
-    margin: 0 132px auto 0;
+    margin: 0 120px auto 0;
 }
 .footer-menu {
     display: flex;
-    flex-direction: column;
-    margin: 0 auto auto 0;
-}
-.footer-menu-box {
-    display: flex;
-    margin-bottom: 20px;
+    flex-direction: row;
+    margin: auto auto auto 0;
 }
 .footer-menu-text {
     font-family: "Pretendard", sans-serif;
-    font-weight: 400;
-    font-size: 14px;
-    color: #949494;
-    margin-right: 24px;
-    cursor: pointer;
-}
-.footer-menu-text-highlight {
-    font-family: "Pretendard", sans-serif;
     font-weight: 500;
-    font-size: 14px;
-    color: #EBEBEB;
-    margin-right: 24px;
+    font-size: 19px;
+    color: #FFFFFF;
+    margin-right: 48px;
+    cursor: pointer;
 }
 
 .top-bottom {
     display: flex;
+    border-top: 1px solid #ACACAC;
+}
+.top-bottom > .brand-icon:nth-child(2) {
+    border-left: 1px solid #ACACAC;
+}
+.footer-submenu {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto auto 0;
+}
+.footer-submenu:first-child {
+    padding-top: 20px;
+}
+.footer-submenu-box {
+    display: flex;
+    margin-bottom: 20px;
+}
+.footer-submenu-text {
+    font-family: "Pretendard", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    color: #949494;
+    margin-right: 24px;
+    cursor: pointer;
+}
+.footer-submenu-text-highlight {
+    font-family: "Pretendard", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #EBEBEB;
+    margin-right: 24px;
+    cursor: pointer;
+}
+
+.brand-icon {
+    display: flex;
+    padding: 0 32px;
+    border-right: 1px solid #ACACAC;
+}
+.brand-icon img {
+    margin: auto auto;
+    cursor: pointer;
 }
 .icon-box {
     display: flex;
     flex-direction: row;
-    margin: auto 0 26px auto;
+    margin: auto 20px auto 10px;
 }
 .icon-button {
     display: flex;
@@ -238,20 +302,45 @@ body {
 
 .footer-bottom {
     display: flex;
+    flex-direction: row;
+}
+.bottom-text-box {
+    display: flex;
     flex-direction: column;
+    margin-right: auto;
 }
 .bottom-text {
     font-family: "Pretendard", sans-serif;
     font-weight: 500;
-    font-size: 11px;
+    font-size: 14px;
     color: #949494;
-    margin-bottom: 7px;
+    margin-bottom: 18px;
 }
 .bottom-copyright {
     font-family: "Pretendard", sans-serif;
     font-weight: 300;
-    font-size: 10px;
+    font-size: 13px;
     color: #949494;
+}
+.family-site {
+    display: flex;
+    flex-direction: row;
+    width: 280px;
+    padding: 12px 22px 12px 24px;
+    border: 1px solid #ACACAC;
+    border-radius: 100px;
+    margin-bottom: auto;
+    cursor: pointer;
+}
+.family-site span {
+    font-family: "Pretendard", sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    color: #FFFFFF;
+    margin: auto auto auto 0;
+}
+.family-site svg {
+    margin: auto 0 auto auto;
 }
 
 /* signin overlay */

@@ -30,12 +30,12 @@
     <script src="/js/layout-member.js"></script>
 </head>
 <body>
-<div class="navbar">
+<div class="navbar hide" id="navbar">
     <div class="navbar-wrapper">
         <div class="navbar-logo" onclick="gotoRoot()">DOKI</div>
         <div class="navbar-searchbar" th:style="${memberRole == null ? 'width: 480px;' : 'width: 400px;'}">
             <input id="searchbar-input" type="text" placeholder="검색어를 입력해주세요." />
-            <div class="searchbar-button" onclick="search()"><img th:src="@{/icon/layout/search.svg}"></div>
+            <div class="searchbar-button" onclick="search()"><img th:src="${cdnDomain + '/static/icon/layout/search.svg'}"></div>
         </div>
         <div class="navbar-menu">
             <div class="menu-button" th:if="${memberRole != null}" th:onclick="|gotoMyReservationPage()|">나의 예약</div>
@@ -56,8 +56,8 @@
             <!--    <button th:if="${memberRole != null}" onclick="sign_out()">로그아웃</button>-->
         </div>
         <div class="navbar-branch">
-            <div class="branch-text">신세계백화점 강남점</div>
-            <div class="branch-icon"><img th:src="@{/icon/layout/branch_arrow.svg}"></div>
+            <div class="branch-text">롯데백화점 잠실점</div>
+            <div class="branch-icon"><img th:src="${cdnDomain + '/static/icon/layout/branch_arrow.svg'}"></div>
         </div>
     </div>
 </div>
@@ -70,8 +70,12 @@
 <!-- 하단은 테스트용이고 프로덕션에서는 JS로 동적 생성되는 코드임. -->
 <div class="noti-toast-viewbox"> <!-- viewbox 밖으로 벗어난 toast box는 보이지 않음 -->
     <div class="noti-toast-box" id="noti-toast-box">
-        <div class="noti-toast-data" id="noti-toast-data">[팝업스토어명] 알림 메시지 내용</div>
-        <div class="noti-toast-datetime" id="noti-toast-datetime">1900-01-01 00:00:00</div>
+        <div class="noti-toast-icon-box" id="noti-toast-icon-box"><img id="noti-toast-icon" th:src="${cdnDomain + '/static/icon/layout/calendar_yes.svg'}"></div>
+        <div class="noti-toast-data-box">
+            <div class="noti-toast-data-title" id="noti-toast-data-title">[팝업스토어명]</div>
+            <div class="noti-toast-data-message" id="noti-toast-data-message">알림 메시지 내용</div>
+            <div class="noti-toast-data-createdAt" id="noti-toast-data-createdAt">1900-01-01 00:00:00</div>
+        </div>
     </div>
 </div>
 
@@ -81,36 +85,54 @@
             <div class="top-top">
                 <div class="footer-logo">DOKI</div>
                 <div class="footer-menu">
-                    <div class="footer-menu-box">
-                        <div class="footer-menu-text">회사소개</div>
-                        <div class="footer-menu-text">법인영업</div>
-                        <div class="footer-menu-text">백화점 신문고</div>
-                        <div class="footer-menu-text">사이트맵</div>
-                    </div>
-                    <div class="footer-menu-box">
-                        <div class="footer-menu-text-highlight">개인정보처리방침</div>
-                        <div class="footer-menu-text-highlight">영상정보처리기기 운영·관리방침</div>
-                        <div class="footer-menu-text">이용약관</div>
-                        <div class="footer-menu-text">신백멤버스 회원약관</div>
-                        <div class="footer-menu-text">신세계포인트 이용약관</div>
-                    </div>
+                    <div class="footer-menu-text">자주하는질문</div>
+                    <div class="footer-menu-text">온라인상담실</div>
+                    <div class="footer-menu-text">상담실안내</div>
+                    <div class="footer-menu-text">분실물안내</div>
+                    <div class="footer-menu-text">가상계좌</div>
+                    <div class="footer-menu-text">공지사항</div>
                 </div>
             </div>
             <div class="top-bottom">
+                <div class="footer-submenu">
+                    <div class="footer-submenu-box">
+                        <div class="footer-submenu-text">회사소개</div>
+                        <div class="footer-submenu-text">회원약관</div>
+                        <div class="footer-submenu-text">인재채용</div>
+                        <div class="footer-submenu-text">사이트맵</div>
+                    </div>
+                    <div class="footer-submenu-box">
+                        <div class="footer-submenu-text-highlight">개인정보처리방침</div>
+                        <div class="footer-submenu-text-highlight">영상정보처리기기 운영·관리방침</div>
+                        <div class="footer-submenu-text">윤리 핫라인</div>
+                    </div>
+                </div>
+                <div class="brand-icon"><img th:src="${cdnDomain + '/static/icon/layout/lotte_mall.svg'}"></div>
+                <div class="brand-icon"><img th:src="${cdnDomain + '/static/icon/layout/timevillas.svg'}"></div>
+                <div class="brand-icon"><img th:src="${cdnDomain + '/static/icon/layout/conran_shop.svg'}"></div>
                 <div class="icon-box">
-                    <div class="icon-button"><img th:src="@{/icon/layout/naver.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/facebook.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/instagram.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/youtube.svg}"></div>
-                    <div class="icon-button"><img th:src="@{/icon/layout/github.svg}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/naver.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/facebook.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/instagram.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/youtube.svg'}"></div>
+                    <div class="icon-button"><img th:src="${cdnDomain + '/static/icon/layout/github.svg'}"></div>
                 </div>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <div class="bottom-text">(주)신세계 대표이사 : 박주형 &nbsp;&nbsp;|&nbsp;&nbsp;주소 : 서울특별시 중구 소공로 63(충무로 1가)&nbsp;&nbsp;|&nbsp;&nbsp;개인정보보호책임자 : 이성환 상무</div>
-            <div class="bottom-text">대표전화 : 1588-1234 (유료)&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 201-81-32195&nbsp;&nbsp;|&nbsp;&nbsp;통신판매업신고번호 : 1996-서울중구-0291</div>
-            <div class="bottom-copyright">COPYRIGHT © 2019 SHINSEGAE. ALL RIGHTS RESERVED.</div>
+            <div class="bottom-text-box">
+                <div class="bottom-text">대표이사 : 정준호&nbsp;&nbsp;|&nbsp;&nbsp;주소 : 서울특별시 중구 남대문로 81 (소공동 1)&nbsp;&nbsp;|&nbsp;&nbsp;개인정보보호책임자 : 박상우</div>
+                <div class="bottom-text">대표전화 : 1577-0001&nbsp;&nbsp;|&nbsp;&nbsp;L.POINT 콜센터 : 1899-8900</div>
+                <div class="bottom-copyright">Ⓒ 2025 LOTTE SHOPPING CO. LTD. ALL RIGHTS RESERVED.</div>
+            </div>
+            <div class="family-site">
+                <span>Family Site</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 2V14.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M14 8.27674L1.5 8.27674" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </div>
         </div>
     </div>
 </div>
