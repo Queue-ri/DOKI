@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 localStorage.setItem("notiList", JSON.stringify(notiList)); // cache
-                localStorage.setItem("notiCount", 0); // cache
+                notiCount = notiList.filter(noti => noti.status === "UNREAD").length;
+                localStorage.setItem("notiCount", notiCount); // cache
                 processNoti(notiList);
             })
             .catch(function (error) {
@@ -48,7 +49,7 @@ function processNoti(notiList) {
     // notiCount가 0이어도 READ 상태의 알림을 렌더링해야 함에 유의
     updateIndicator();
     notiList.forEach(noti => {
-        addSingleElementToAlarmList(noti);
+        addSingleElementToAlarmList(noti); // append
     });
 }
 
@@ -224,7 +225,7 @@ function connectSSE() {
         updateIndicator();
 
         // 2. 알림 리스트 뷰에 element 추가
-        addSingleElementToAlarmList(parsedEventData);
+        addSingleElementToAlarmList(parsedEventData, true); // prepend
 
         // 3. 현재의 URL에 따른 동적 뷰 처리
         if (window.location.href === `${window.location.origin}/store/reserve`) { // 1. 예약 승인 / 예약 취소 페이지면
@@ -267,7 +268,7 @@ function updateIndicator() {
     bellBoxImg.src = "/icon/layout/bell_on_dark.svg";
 }
 
-function addSingleElementToAlarmList(data) {
+function addSingleElementToAlarmList(data, reverse = false) {
     const alertListBoxDiv = document.getElementById("navbar-alert-list-box");
 
     const alertElementDiv = document.createElement("div");
@@ -311,7 +312,13 @@ function addSingleElementToAlarmList(data) {
     alertElementDiv.appendChild(alertElementContentBoxDiv);
     alertElementDiv.appendChild(alertDeleteButtonDiv);
 
-    alertListBoxDiv.appendChild(alertElementDiv);
+    // 리스트에 추가: 옵션에 따라 prepend 또는 append
+    if (reverse) {
+        alertListBoxDiv.prepend(alertElementDiv);
+    }
+    else {
+        alertListBoxDiv.appendChild(alertElementDiv);
+    }
 
     /* 알림 클릭 시 동작 */
     // 알림 클릭 시 READ 처리
