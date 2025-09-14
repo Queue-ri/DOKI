@@ -8,6 +8,7 @@ import com.doki.commonservice.store.service.StoreService;
 import com.doki.commonservice.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,9 @@ public class ReserveController {
     private final StoreService storeService;
     private final MemberService memberService;
 
+    @Value("${cloud.aws.cloudfront.domain}")
+    private String cdnDomain;
+
     @GetMapping
     public String viewReservationPage(
             @RequestHeader(value="x-gateway-member-role", required=false) String memberRole,
@@ -46,6 +50,8 @@ public class ReserveController {
         model.addAttribute("memberRole", role);
         log.info("requested code: {}", code);
         model.addAttribute("memberCode", code);
+
+        model.addAttribute("cdnDomain", cdnDomain);
 
         /* store info, store reservation setting, member 데이터 가져오기 */
         Store store = storeService.getStoreInfo(storeId);

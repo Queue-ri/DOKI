@@ -123,7 +123,7 @@ public class ReserveService {
 
         // 이용자 -> 운영자에게 예약 자동 승인 알림
         // 예약 V2는 자동 승인됨.
-        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), dto.getReservedDateTime(), "AUTO_CONFIRMED");
+        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), reservation, "AUTO_CONFIRMED");
     }
 
 
@@ -177,7 +177,7 @@ public class ReserveService {
         notificationService.notifyReserveResultToMember(reservation.getReservationId(), "RESERVE_PENDING");
 
         // 이용자 -> 운영자에게 예약 승인 요청 알림
-        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), dto.getReservedDateTime(), "CONFIRM_REQUEST");
+        notificationService.notifyReserveRequestToManager(store.getMember().getMemberCode(), reservation, "CONFIRM_REQUEST");
 
         return ResponseEntity.ok().build();
     }

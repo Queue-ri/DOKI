@@ -92,7 +92,7 @@ public class MemberService {
         // 이용자 -> 운영자 예약 취소 요청 SSE 알림
         notificationService.notifyReserveRequestToManager(
                 reservation.getStore().getMember().getMemberCode(),
-                reservation.getReservedDateTime(),
+                reservation,
                 "CANCEL_REQUEST"
         );
 
