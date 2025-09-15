@@ -97,5 +97,5 @@ function clearUrlAddress() {
     // 주소창 조작
     // const nextURL = `http://localhost:9093/category?id=${categoryId}&page=${pageIdx}`;
     const nextURL = window.location.origin; // 새로고침시
-    window.history.replaceState({}, '신세계백화점 팝업스토어 행사', nextURL);
+    window.history.replaceState({}, '롯데백화점 팝업스토어 행사', nextURL);
 }
