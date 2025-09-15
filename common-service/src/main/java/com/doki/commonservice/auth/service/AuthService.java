@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -156,9 +157,11 @@ public class AuthService {
                 .build()
         );
 
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.ok()
                 .headers(headers)
-                .build();
+                .body(Map.of(
+                    "memberRole", memberRole
+                ));
     }
 
     /* 로그아웃 */
