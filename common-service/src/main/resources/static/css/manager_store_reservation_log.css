@@ -91,7 +91,7 @@ table {
 /* end of table css reset */
 
 tr:hover {
-    background-color: #feffda;
+    background-color: #F9FBC8;
     transition: 0.15s linear;
 }
 
@@ -126,7 +126,7 @@ td {
     font-family: "Pretendard", sans-serif;
     color: #131313;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: -0.5px;
     padding: 8px 16px;
 }
@@ -134,7 +134,7 @@ td {
     font-family: "Pretendard", sans-serif;
     color: #131313;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: -0.5px;
     padding: 15.5px 16px;
 }
