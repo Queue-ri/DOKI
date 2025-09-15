@@ -16,7 +16,7 @@
 }
 .category-box {
     display: flex;
-    gap: 20px;
+    gap: 4px;
     flex-direction: row;
     margin: 0 auto 64px auto;
 }
@@ -24,11 +24,13 @@
     font-family: "Pretendard", sans-serif;
     font-weight: 600;
     font-size: 20px;
-    transition: 0.3s;
+    padding: 7px 16px;
+    border-radius: 100px;
+    transition: 0.4s ease;
     cursor: pointer;
 }
 .category-button:hover {
-    color: #F8434E;
+    background-color: #E0F55C;
 }
 
 .store-box-top {
@@ -77,12 +79,17 @@
     height: 400px;
     background-color: #ACACAC;
     margin-bottom: 24px;
+    overflow: hidden;
 }
 .store-thumbnail img {
     display: flex;
     width: 400px;
     height: 400px;
     object-fit: cover;
+    transition: transform 0.5s ease;
+}
+.store-meta:hover img {
+    transform: scale(1.1);
 }
 .store-text-box {
     display: flex;
@@ -93,14 +100,14 @@
 .store-name {
     font-family: "Pretendard", sans-serif;
     font-weight: 600;
-    font-size: 20px;
+    font-size: 22px;
     margin: 0 auto 12px 0;
 }
 .store-desc {
     height: 40px;
     font-family: "Pretendard", sans-serif;
     font-weight: 300;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 20px;
     word-break: break-word;
     margin: 0 auto 19px 0;
@@ -117,7 +124,7 @@
     display: flex;
     flex-direction: row;
     gap: 8px;
-    margin: 0 auto 48px auto;
+    margin: 0 auto 72px auto;
 }
 .pagination-left {
     margin: auto 0 auto auto;

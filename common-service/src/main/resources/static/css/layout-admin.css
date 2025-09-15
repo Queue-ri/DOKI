@@ -116,6 +116,7 @@ body {
     border-right: 1px solid #E1E0E1;
     background-color: #FFFFFF;
     top: 80px;
+    z-index: 998;
 }
 .menu-group {
     display: flex;
@@ -145,15 +146,15 @@ body {
 
 /* css of selected menu-button */
 .menu-button.selected {
-    background-color: #FFF2F3;
+    background: linear-gradient(93.73deg, #E73A3A 0%, #FF5151 100%) !important;
 }
 
 .menu-button.selected svg {
-    color: #F8434E;
+    color: #FFFFFF !important;
 }
 
 .menu-button.selected .menu-text {
-    color: #F8434E;
+    color: #FFFFFF !important;
 }
 /* end of selected menu-button css */
 

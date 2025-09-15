@@ -46,7 +46,7 @@
     font-family: "Pretendard", sans-serif;
     color: #131313;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
 }
 .metric-data {
     position: absolute;
@@ -117,7 +117,7 @@ table {
 /* end of table css reset */
 
 tr:hover {
-    background-color: #feffda;
+    background-color: #F9FBC8;
     transition: 0.15s linear;
 }
 
@@ -152,7 +152,7 @@ td {
     font-family: "Pretendard", sans-serif;
     color: #131313;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: -0.5px;
     padding: 8px 16px;
 }

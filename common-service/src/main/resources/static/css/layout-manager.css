@@ -233,12 +233,12 @@ body {
     cursor: pointer;
 }
 .menu-button:hover {
-    background-color: rgba(135, 121, 108, 0.15);
+    background-color: #FFF2F3;
 }
 
 /* css of selected menu-button */
 .menu-button.selected {
-    background-color: #AE9B73 !important;
+    background: linear-gradient(93.73deg, #E73A3A 0%, #FF5151 100%) !important;
 }
 .menu-button.selected svg {
     color: #FFFFFF !important;
@@ -252,10 +252,10 @@ body {
     transition: 0.1s ease-out;
 }
 .menu-button:hover svg {
-    color: #87796C;
+    color: #F8434E;
 }
 .menu-button:hover .menu-text {
-    color: #87796C;
+    color: #F8434E;
 }
 .menu-icon-box {
     display: flex;
